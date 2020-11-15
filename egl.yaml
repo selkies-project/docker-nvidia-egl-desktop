@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: egl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: egl
+  template:
+    metadata:
+      labels:
+        app: egl
+    spec:
+      hostname: egl
+      containers:
+      - name: egl
+        image: ehfd/nvidia-egl-desktop:latest
+        env:
+        - name: TZ
+          value: "America/Los_Angeles"
+        - name: NETWORKING
+          value: "yes"
+        - name: container
+          value: "docker"
+        - name: SIZEW
+          value: "1920"
+        - name: SIZEH
+          value: "1080"
+        - name: CDEPTH
+          value: "24"
+        - name: SHARED
+          value: "TRUE"
+        - name: VNCPASS
+          value: "vncpasswd"
+#          valueFrom:
+#            secretKeyRef:
+#              name: egl-pass
+#              key: egl-pass
+        securityContext:
+          privileged: true
+        stdin: true
+        tty: true
+        ports:
+          - containerPort: 5901
+            protocol: TCP
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+            memory: "64Gi"
+            cpu: "16"
+          requests:
+            memory: "100m"
+            cpu: "100m"
+        volumeMounts:
+        - mountPath: /cache
+          name: egl-cache-vol
+        - mountPath: /home/user
+          name: egl-root-vol
+        - mountPath: /dev/shm
+          name: dshm
+        - mountPath: /dev/dri
+          name: drm
+      volumes:
+        - name: egl-cache-vol
+          emptyDir: {}
+#          persistentVolumeClaim:
+#            claimName: egl-cache-vol
+        - name: egl-root-vol
+          emptyDir: {}
+#          persistentVolumeClaim:
+#            claimName: egl-root-vol
+        - name: dshm
+          emptyDir:
+            medium: Memory
+        - name: drm
+          hostPath:
+            path: /dev/dri
