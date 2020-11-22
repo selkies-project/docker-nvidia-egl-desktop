@@ -1,6 +1,6 @@
 # docker-nvidia-egl-desktop
 
-MATE Desktop container for NVIDIA GPUs without using an X Server, directly accessing the GPU with EGL to emulate GLX using VirtualGL and TurboVNC. Does not require `/tmp/X11-unix` host sockets.
+MATE Desktop container for NVIDIA GPUs without using an X Server, directly accessing the GPU with EGL to emulate GLX using VirtualGL and TurboVNC. Does not require `/tmp/.X11-unix` host sockets.
 
 Requires NVIDIA GPU drivers and corresponding container toolkits for allocating GPUs to be set up on the host.
 
