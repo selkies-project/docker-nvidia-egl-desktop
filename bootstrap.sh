@@ -6,21 +6,20 @@ trap "echo TRAPed signal" HUP INT QUIT KILL TERM
 export PATH="$PATH":/opt/VirtualGL/bin:/opt/TurboVNC/bin
 
 mkdir -p ~/.vnc
-echo "$VNCPASS" | vncpasswd -f > ~/.vnc/passwd
+echo "$VNCPASS" | vncpasswd -f >~/.vnc/passwd
 chmod 0600 ~/.vnc/passwd
 
 if [ "x$SHARED" == "xTRUE" ]; then
-    export SHARESTRING="-shared"
+  export SHARESTRING="-shared"
 fi
 
 printf "3\nn\nx\n" | sudo /opt/VirtualGL/bin/vglserver_config
 
-for drm in /dev/dri/card*
-do
-if /opt/VirtualGL/bin/eglinfo "$drm"; then
+for drm in /dev/dri/card*; do
+  if /opt/VirtualGL/bin/eglinfo "$drm"; then
     export VGL_DISPLAY="$drm"
     break
-fi
+  fi
 done
 
 export TVNC_WM=mate-session
