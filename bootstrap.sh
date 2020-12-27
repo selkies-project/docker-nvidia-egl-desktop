@@ -28,11 +28,6 @@ export TVNC_WM=mate-session
 /opt/websockify/run 5901 --web=/opt/noVNC --wrap-mode=ignore -- vncserver :1 -geometry $SIZEW"x"$SIZEH -depth $CDEPTH -vgl &
 sleep 2
 
-export DISPLAY=:1
-gsettings set org.gnome.desktop.lockdown disable-lock-screen true
-gsettings set org.gnome.desktop.screensaver lock-enabled false
-gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
-
 pulseaudio --start
 
 echo "Session Running. Press [Return] to exit."

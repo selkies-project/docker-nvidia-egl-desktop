@@ -4,7 +4,7 @@ MATE Desktop container for NVIDIA GPUs without using an X Server, directly acces
 
 Requires NVIDIA GPU drivers and corresponding container toolkits for allocating GPUs to be set up on the host.
 
-Connect to the spawned noVNC WebSocket instance with a browser in port 5901, no VNC client required.
+Connect to the spawned noVNC WebSocket instance with a browser in port 5901, no VNC client required (password for the default user is 'vncpasswd').
 
 Note: Requires access to the corresponding **/dev/dri/cardX** and **/dev/dri/renderX** DRM device of the allocated NVIDIA GPU. Check out [k8s-hostdev-plugin](https://github.com/bluebeach/k8s-hostdev-plugin) for provisioning this in Kubernetes clusters without privileged access.
 
