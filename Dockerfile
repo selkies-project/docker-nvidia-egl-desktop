@@ -2,7 +2,7 @@ FROM nvidia/opengl:1.2-glvnd-runtime-ubuntu20.04
 
 LABEL maintainer "https://github.com/ehfd"
 
-# Make all NVIDIA GPUS visible, but we want to manually install drivers
+# Make all NVIDIA GPUS visible
 ARG NVIDIA_VISIBLE_DEVICES=all
 # Supress interactive menu while installing keyboard-configuration
 ARG DEBIAN_FRONTEND=noninteractive
@@ -12,6 +12,9 @@ ARG VIRTUALGL_VERSION=2.6.80
 ARG TURBOVNC_VERSION=2.2.80
 ARG WEBSOCKIFY_VERSION=0.8.0
 ARG NOVNC_VERSION=1.1.0
+
+# Default password is 'vncpasswd'
+ENV VNCPASS vncpasswd
 
 # Install desktop
 RUN apt-get update && apt-get install -y software-properties-common
@@ -93,7 +96,7 @@ RUN chmod 755 /bootstrap.sh
 COPY supervisord.conf /etc/supervisord.conf
 RUN chmod 755 /etc/supervisord.conf
 
-# Create user with password 'vncpasswd'
+# Create user with password '${VNCPASS}'
 RUN apt-get update && apt-get install -y --no-install-recommends \
       sudo && \
     groupadd -g 1000 user && \
@@ -101,7 +104,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     usermod -a -G adm,audio,cdrom,disk,games,lpadmin,sudo,dip,plugdev,tty,video user && \
     echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     chown -R user:user /home/user/ && \
-    echo 'user:vncpasswd' | chpasswd && \
+    echo 'user:${VNCPASS}' | chpasswd && \
     rm -rf /var/lib/apt/lists/*
 
 EXPOSE 5901
