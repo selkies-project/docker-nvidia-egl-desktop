@@ -13,8 +13,11 @@ ARG TURBOVNC_VERSION=2.2.80
 ARG WEBSOCKIFY_VERSION=0.8.0
 ARG NOVNC_VERSION=1.1.0
 
-# Default password is 'vncpasswd'
+# Default options (password is 'vncpasswd')
 ENV VNCPASS vncpasswd
+ENV SIZEW 1920
+ENV SIZEH 1080
+ENV CDEPTH 24
 
 # Install desktop
 RUN apt-get update && apt-get install -y software-properties-common
@@ -58,7 +61,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 # Sound driver including PulseAudio and GTK library
-# If you want to use sounds on docker, try `pulseaudio --start`
+# If you want to use sounds on docker, try 'pulseaudio --start'
 RUN apt-get update && apt-get install -y --no-install-recommends \
       alsa pulseaudio libgtk2.0-0 && \
     rm -rf /var/lib/apt/lists/*
@@ -96,7 +99,7 @@ RUN chmod 755 /bootstrap.sh
 COPY supervisord.conf /etc/supervisord.conf
 RUN chmod 755 /etc/supervisord.conf
 
-# Create user with password '${VNCPASS}'
+# Create user with password ${VNCPASS}
 RUN apt-get update && apt-get install -y --no-install-recommends \
       sudo && \
     groupadd -g 1000 user && \
@@ -104,7 +107,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     usermod -a -G adm,audio,cdrom,disk,games,lpadmin,sudo,dip,plugdev,tty,video user && \
     echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     chown -R user:user /home/user/ && \
-    echo 'user:${VNCPASS}' | chpasswd && \
+    echo "user:${VNCPASS}" | chpasswd && \
     rm -rf /var/lib/apt/lists/*
 
 EXPOSE 5901

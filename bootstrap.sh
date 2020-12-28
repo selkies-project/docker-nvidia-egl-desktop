@@ -3,7 +3,7 @@ set -e
 
 trap "echo TRAPed signal" HUP INT QUIT KILL TERM
 
-echo 'user:${VNCPASS}' | sudo chpasswd
+echo "user:${VNCPASS}" | sudo chpasswd
 
 mkdir -p ~/.vnc
 echo $VNCPASS | vncpasswd -f > ~/.vnc/passwd
@@ -17,10 +17,11 @@ pulseaudio --start
 
 printf "3\nn\nx\n" | sudo /opt/VirtualGL/bin/vglserver_config
 
-for drm in /dev/dri/card*
+for DRM in /dev/dri/card*
 do
-if /opt/VirtualGL/bin/eglinfo ${drm}; then
-    export VGL_DISPLAY=${drm}
+if /opt/VirtualGL/bin/eglinfo $DRM
+then
+    export VGL_DISPLAY=$DRM
     break
 fi
 done
