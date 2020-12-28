@@ -19,18 +19,12 @@ spec:
         env:
         - name: TZ
           value: "America/Los_Angeles"
-        - name: NETWORKING
-          value: "yes"
-        - name: container
-          value: "docker"
         - name: SIZEW
           value: "1920"
         - name: SIZEH
           value: "1080"
         - name: CDEPTH
           value: "24"
-        - name: SHARED
-          value: "TRUE"
         - name: VNCPASS
           value: "vncpasswd"
 #          valueFrom:
