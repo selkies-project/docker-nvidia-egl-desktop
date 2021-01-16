@@ -72,12 +72,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/* && \
     VULKAN_API_VERSION=`dpkg -s libvulkan1 | grep -oP 'Version: [0-9|\.]+' | grep -oP '[0-9]+(\.[0-9]+)(\.[0-9]+)'` && \
     mkdir -p /etc/vulkan/icd.d/ && \
-    echo "{\
-    \"file_format_version\" : \"1.0.0\",\
-    \"ICD\": {\
-        \"library_path\": \"libGLX_nvidia.so.0\",\
-        \"api_version\" : \"${VULKAN_API_VERSION}\"\
-    }\
+    echo "{\n\
+    \"file_format_version\" : \"1.0.0\",\n\
+    \"ICD\": {\n\
+        \"library_path\": \"libGLX_nvidia.so.0\",\n\
+        \"api_version\" : \"${VULKAN_API_VERSION}\"\n\
+    }\n\
 }" > /etc/vulkan/icd.d/nvidia_icd.json
 
 # Sound driver including PulseAudio and GTK library
@@ -100,12 +100,12 @@ RUN curl -fsSL -O https://s3.amazonaws.com/virtualgl-pr/dev/linux/virtualgl_${VI
     apt-get update && apt-get install -y --no-install-recommends ./turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
     rm turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
     rm -rf /var/lib/apt/lists/* && \
-    echo 'no-remote-connections\n\
+    echo "no-remote-connections\n\
 no-httpd\n\
 no-x11-tcp-connections\n\
 no-pam-sessions\n\
 permitted-security-types = VNC, otp\
-' > /etc/turbovncserver-security.conf
+" > /etc/turbovncserver-security.conf
 
 ENV PATH ${PATH}:/opt/VirtualGL/bin:/opt/TurboVNC/bin
 
