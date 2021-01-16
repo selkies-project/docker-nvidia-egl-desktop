@@ -9,7 +9,8 @@ mkdir -p ~/.vnc
 echo $VNCPASS | vncpasswd -f > ~/.vnc/passwd
 chmod 0600 ~/.vnc/passwd
 
-if [ "x${SHARED}" == "xTRUE" ]; then
+if [ "x${SHARED}" == "xTRUE" ]
+then
     export SHARESTRING="-shared"
 fi
 
