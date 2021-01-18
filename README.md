@@ -11,5 +11,5 @@ Note: Requires access to the corresponding **/dev/dri/cardX** and **/dev/dri/ren
 For Docker this will be sufficient (the container will not use DRM devices it is not allocated to):
 
 ```
-docker run --gpus 1 --device=/dev/dri:rw -it -e SIZEW=1920 -e SIZEH=1080 -e CDEPTH=24 -e VNCPASS=vncpasswd -p 5901:5901 ehfd/nvidia-egl-desktop:latest
+docker run --gpus 1 --device=/dev/dri:rw -it -e SIZEW=1920 -e SIZEH=1080 -e CDEPTH=24 -e SHARED=TRUE -e VNCPASS=vncpasswd -p 5901:5901 ehfd/nvidia-egl-desktop:latest
 ```

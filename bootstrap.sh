@@ -11,7 +11,7 @@ chmod 0600 ~/.vnc/passwd
 
 if [ "x${SHARED}" == "xTRUE" ]
 then
-    export SHARESTRING="-shared"
+    export SHARESTRING="-alwaysshared"
 fi
 
 pulseaudio --start
@@ -29,7 +29,7 @@ done
 
 export TVNC_WM=mate-session
 
-/opt/websockify/run 5901 --web=/opt/noVNC --wrap-mode=ignore -- vncserver :1 -geometry $SIZEW"x"$SIZEH -depth $CDEPTH -vgl &
+/opt/websockify/run 5901 --web=/opt/noVNC --wrap-mode=ignore -- vncserver :1 -geometry $SIZEW"x"$SIZEH -depth $CDEPTH -vgl -noreset $SHARESTRING &
 
 echo "Session Running. Press [Return] to exit."
 read
