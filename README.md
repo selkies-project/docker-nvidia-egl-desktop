@@ -8,6 +8,8 @@ Connect to the spawned noVNC WebSocket instance with a browser in port 5901, no 
 
 Note: Requires access to the corresponding **/dev/dri/cardX** and **/dev/dri/renderX** DRM device of the allocated NVIDIA GPU. Check out [k8s-hostdev-plugin](https://github.com/bluebeach/k8s-hostdev-plugin) for provisioning this in Kubernetes clusters without privileged access.
 
+For building Ubuntu 18.04 containers, in **Dockerfile** change `FROM nvidia/opengl:1.2-glvnd-runtime-ubuntu20.04` to `FROM nvidia/opengl:1.2-glvnd-runtime-ubuntu18.04` and remove `render` group in the section creating the default user, then in **bootstrap.sh** comment out `pulseaudio --start`.
+
 For Docker this will be sufficient (the container will not use DRM devices it is not allocated to):
 
 ```
