@@ -63,7 +63,7 @@ RUN apt-get install -y \
         net-tools \
         ubuntu-mate-core \
         ubuntu-mate-desktop && \
-        rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/*
 
 # Install Vulkan
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -121,8 +121,8 @@ RUN curl -fsSL https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz |
 
 # X server segfault error mitigation
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      dbus-x11 \
-      libdbus-c++-1-0v5 && \
+        dbus-x11 \
+        libdbus-c++-1-0v5 && \
     rm -rf /var/lib/apt/lists/*
 
 COPY bootstrap.sh /bootstrap.sh
@@ -132,7 +132,7 @@ RUN chmod 755 /etc/supervisord.conf
 
 # Create user with password ${VNCPASS}
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      sudo && \
+        sudo && \
     rm -rf /var/lib/apt/lists/* && \
     groupadd -g 1000 user && \
     useradd -ms /bin/bash user -u 1000 -g 1000 && \
