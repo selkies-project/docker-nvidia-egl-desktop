@@ -3,6 +3,7 @@ set -e
 
 trap "echo TRAPed signal" HUP INT QUIT KILL TERM
 
+sudo chown -R user:user ~
 echo "user:${VNCPASS}" | sudo chpasswd
 
 mkdir -p ~/.vnc
@@ -13,8 +14,6 @@ if [ "x${SHARED}" == "xTRUE" ]
 then
     export SHARESTRING="-alwaysshared"
 fi
-
-pulseaudio --start
 
 printf "3\nn\nx\n" | sudo /opt/VirtualGL/bin/vglserver_config
 
@@ -30,6 +29,8 @@ done
 export TVNC_WM=mate-session
 
 /opt/websockify/run 5901 --web=/opt/noVNC --wrap-mode=ignore -- vncserver :1 -geometry $SIZEW"x"$SIZEH -depth $CDEPTH -vgl -noreset $SHARESTRING &
+
+pulseaudio --start
 
 echo "Session Running. Press [Return] to exit."
 read
