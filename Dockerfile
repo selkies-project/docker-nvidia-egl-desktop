@@ -125,11 +125,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libdbus-c++-1-0v5 && \
     rm -rf /var/lib/apt/lists/*
 
-COPY bootstrap.sh /bootstrap.sh
-RUN chmod 755 /bootstrap.sh
-COPY supervisord.conf /etc/supervisord.conf
-RUN chmod 755 /etc/supervisord.conf
-
 # Create user with password ${VNCPASS}
 RUN apt-get update && apt-get install -y --no-install-recommends \
         sudo && \
@@ -141,6 +136,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     chown -R user:user /home/user && \
     echo "user:${VNCPASS}" | chpasswd
+
+COPY bootstrap.sh /bootstrap.sh
+RUN chmod 755 /bootstrap.sh
+COPY supervisord.conf /etc/supervisord.conf
+RUN chmod 755 /etc/supervisord.conf
 
 EXPOSE 5901
 
