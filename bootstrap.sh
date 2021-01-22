@@ -18,8 +18,7 @@ printf "3\nn\nx\n" | sudo /opt/VirtualGL/bin/vglserver_config
 
 for DRM in /dev/dri/card*
 do
-if /opt/VirtualGL/bin/eglinfo $DRM
-then
+if /opt/VirtualGL/bin/eglinfo $DRM; then
     export VGL_DISPLAY=$DRM
     break
 fi
