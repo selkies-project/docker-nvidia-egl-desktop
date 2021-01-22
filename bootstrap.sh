@@ -24,7 +24,7 @@ done
 
 export TVNC_WM=mate-session
 
-/opt/websockify/run 5901 --web=/opt/noVNC --wrap-mode=ignore -- vncserver :1 -geometry "${SIZEW}x${SIZEH}" -depth "$CDEPTH" -vgl -noreset "$SHARESTRING" &
+/opt/websockify/run 5901 --web=/opt/noVNC --wrap-mode=ignore -- vncserver :1 -geometry "${SIZEW}x$SIZEH" -depth "$CDEPTH" -vgl -noreset "$SHARESTRING" &
 
 # Comment this out in Ubuntu 18.04
 pulseaudio --start
