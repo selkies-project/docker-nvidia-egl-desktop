@@ -132,7 +132,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     groupadd -g 1000 user && \
     useradd -ms /bin/bash user -u 1000 -g 1000 && \
     # Remove 'render' group in Ubuntu 18.04
-    usermod -a -G adm,audio,bluetooth,cdrom,dialout,dip,fax,floppy,input,lpadmin,netdev,plugdev,pulse-access,render,scanner,ssh,sudo,tape,tty,video,voice user && \
+    usermod -a -G adm,audio,cdrom,dialout,dip,fax,floppy,input,lpadmin,netdev,plugdev,render,scanner,ssh,sudo,tape,tty,video,voice user && \
     echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     chown -R user:user /home/user && \
     echo "user:${VNCPASS}" | chpasswd
