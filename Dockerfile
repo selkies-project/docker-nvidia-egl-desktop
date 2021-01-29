@@ -26,8 +26,8 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # Install desktop
-RUN apt-get update && apt-get install -y software-properties-common
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
+        software-properties-common \
         apt-utils \
         build-essential \
         ca-certificates \
