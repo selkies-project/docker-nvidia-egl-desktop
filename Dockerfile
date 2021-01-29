@@ -47,6 +47,8 @@ RUN apt-get install -y \
         make \
         python \
         python-numpy \
+        python3 \
+        python3-numpy \
         x11-xkb-utils \
         xauth \
         xfonts-base \
