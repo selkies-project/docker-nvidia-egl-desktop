@@ -3,17 +3,17 @@ set -e
 
 trap "echo TRAPed signal" HUP INT QUIT KILL TERM
 
+export PATH="${PATH}:/opt/VirtualGL/bin:/opt/TurboVNC/bin"
+
 echo "user:$VNCPASS" | sudo chpasswd
 
 mkdir -p ~/.vnc
-echo "$VNCPASS" | vncpasswd -f >~/.vnc/passwd
+echo "$VNCPASS" | /opt/TurboVNC/bin/vncpasswd -f >~/.vnc/passwd
 chmod 0600 ~/.vnc/passwd
 
 if [ "x$SHARED" == "xTRUE" ]; then
   export SHARESTRING="-alwaysshared"
 fi
-
-export PATH="${PATH}:/opt/VirtualGL/bin:/opt/TurboVNC/bin"
 
 printf "3\nn\nx\n" | sudo /opt/VirtualGL/bin/vglserver_config
 
@@ -26,7 +26,7 @@ done
 
 export TVNC_WM=mate-session
 
-vncserver :0 -geometry "${SIZEW}x${SIZEH}" -depth "$CDEPTH" -vgl -noreset "$SHARESTRING" &
+/opt/TurboVNC/bin/vncserver :0 -geometry "${SIZEW}x${SIZEH}" -depth "$CDEPTH" -vgl -noreset "$SHARESTRING" &
 sleep 1
 
 /opt/noVNC/utils/launch.sh --vnc localhost:5900 --listen 5901 &
