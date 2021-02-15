@@ -109,19 +109,14 @@ no-pam-sessions\n\
 permitted-security-types = VNC, otp\
 " > /etc/turbovncserver-security.conf
 
-ENV PATH ${PATH}:/opt/VirtualGL/bin:/opt/TurboVNC/bin
-
 # noVNC and Websockify
-ARG NOVNC_VERSION=1.1.0
-ARG WEBSOCKIFY_VERSION=0.8.0
+ENV NOVNC_VERSION 1.2.0
 RUN curl -fsSL https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz | tar -xzf - -C /opt && \
-    curl -fsSL https://github.com/novnc/websockify/archive/v${WEBSOCKIFY_VERSION}.tar.gz | tar -xzf - -C /opt && \
     mv /opt/noVNC-${NOVNC_VERSION} /opt/noVNC && \
-    mv /opt/websockify-${WEBSOCKIFY_VERSION} /opt/websockify && \
     ln -s /opt/noVNC/vnc.html /opt/noVNC/index.html && \
-    cd /opt/websockify && make && cd /
+    git clone https://github.com/novnc/websockify /opt/noVNC/utils/websockify
 
-# X server segfault error mitigation
+# Xorg segfault error mitigation
 RUN apt-get update && apt-get install -y --no-install-recommends \
         dbus-x11 \
         libdbus-c++-1-0v5 && \

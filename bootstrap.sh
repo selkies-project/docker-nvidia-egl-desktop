@@ -13,6 +13,8 @@ if [ "x$SHARED" == "xTRUE" ]; then
   export SHARESTRING="-alwaysshared"
 fi
 
+export PATH="${PATH}:/opt/VirtualGL/bin:/opt/TurboVNC/bin"
+
 printf "3\nn\nx\n" | sudo /opt/VirtualGL/bin/vglserver_config
 
 for DRM in /dev/dri/card*; do
@@ -24,7 +26,10 @@ done
 
 export TVNC_WM=mate-session
 
-/opt/websockify/run 5901 --web=/opt/noVNC --wrap-mode=ignore -- vncserver :1 -geometry "${SIZEW}x${SIZEH}" -depth "$CDEPTH" -vgl -noreset "$SHARESTRING" &
+vncserver :0 -geometry "${SIZEW}x${SIZEH}" -depth "$CDEPTH" -vgl -noreset "$SHARESTRING" &
+sleep 1
+
+/opt/noVNC/utils/launch.sh --vnc localhost:5900 --listen 5901 &
 
 # Comment this out in Ubuntu 18.04
 pulseaudio --start
