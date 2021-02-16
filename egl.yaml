@@ -18,7 +18,7 @@ spec:
         image: ehfd/nvidia-egl-desktop:latest
         env:
         - name: TZ
-          value: "America/Los_Angeles"
+          value: "UTC"
         - name: SIZEW
           value: "1920"
         - name: SIZEH
@@ -38,8 +38,8 @@ spec:
         stdin: true
         tty: true
         ports:
-          - containerPort: 5901
-            protocol: TCP
+        - containerPort: 5901
+          protocol: TCP
         resources:
           limits:
             memory: 64Gi
@@ -58,17 +58,17 @@ spec:
         - mountPath: /dev/dri
           name: drm
       volumes:
-        - name: egl-cache-vol
-          emptyDir: {}
-#          persistentVolumeClaim:
-#            claimName: egl-cache-vol
-        - name: egl-root-vol
-          emptyDir: {}
-#          persistentVolumeClaim:
-#            claimName: egl-root-vol
-        - name: dshm
-          emptyDir:
-            medium: Memory
-        - name: drm
-          hostPath:
-            path: /dev/dri
+      - name: egl-cache-vol
+        emptyDir: {}
+#        persistentVolumeClaim:
+#          claimName: egl-cache-vol
+      - name: egl-root-vol
+        emptyDir: {}
+#        persistentVolumeClaim:
+#          claimName: egl-root-vol
+      - name: dshm
+        emptyDir:
+          medium: Memory
+      - name: drm
+        hostPath:
+          path: /dev/dri
