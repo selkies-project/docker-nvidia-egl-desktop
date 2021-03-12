@@ -41,6 +41,8 @@ RUN apt-get update && apt-get install -y \
         libc6-dev \
         libglu1 \
         libglu1:i386 \
+        libegl1-mesa \
+        libegl1-mesa:i386 \
         libsm6 \
         libxv1 \
         libxv1:i386 \
@@ -94,15 +96,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ARG VIRTUALGL_VERSION=2.6.80
 ARG TURBOVNC_VERSION=2.2.80
 RUN curl -fsSL -O https://s3.amazonaws.com/virtualgl-pr/dev/linux/virtualgl_${VIRTUALGL_VERSION}_amd64.deb && \
-    apt-get update && apt-get install -y --no-install-recommends ./virtualgl_${VIRTUALGL_VERSION}_amd64.deb && \
-    rm virtualgl_${VIRTUALGL_VERSION}_amd64.deb && \
+    curl -fsSL -O https://s3.amazonaws.com/virtualgl-pr/dev/linux/virtualgl32_${VIRTUALGL_VERSION}_amd64.deb && \
+    apt-get update && apt-get install -y --no-install-recommends ./virtualgl_${VIRTUALGL_VERSION}_amd64.deb ./virtualgl32_${VIRTUALGL_VERSION}_amd64.deb && \
+    rm virtualgl_${VIRTUALGL_VERSION}_amd64.deb virtualgl32_${VIRTUALGL_VERSION}_amd64.deb && \
     chmod u+s /usr/lib/libvglfaker.so && \
     chmod u+s /usr/lib/libdlfaker.so && \
+    chmod u+s /usr/lib32/libvglfaker.so && \
+    chmod u+s /usr/lib32/libdlfaker.so && \
+    chmod u+s /usr/lib/i386-linux-gnu/libvglfaker.so && \
+    chmod u+s /usr/lib/i386-linux-gnu/libdlfaker.so && \
     curl -fsSL -O https://s3.amazonaws.com/turbovnc-pr/dev/linux/turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
     apt-get update && apt-get install -y --no-install-recommends ./turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
     rm turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
     rm -rf /var/lib/apt/lists/* && \
-    echo "no-remote-connections\n\
+    echo -e "no-remote-connections\n\
 no-httpd\n\
 no-x11-tcp-connections\n\
 no-pam-sessions\n\
