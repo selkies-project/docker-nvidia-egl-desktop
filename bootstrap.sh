@@ -3,9 +3,9 @@ set -e
 
 trap "echo TRAPed signal" HUP INT QUIT KILL TERM
 
-export PATH="${PATH}:/opt/VirtualGL/bin:/opt/TurboVNC/bin"
-
 echo "user:$VNCPASS" | sudo chpasswd
+
+sudo /etc/init.d/dbus start
 
 mkdir -p ~/.vnc
 echo "$VNCPASS" | /opt/TurboVNC/bin/vncpasswd -f >~/.vnc/passwd
@@ -30,8 +30,7 @@ export TVNC_WM=mate-session
 
 /opt/noVNC/utils/launch.sh --vnc localhost:5900 --listen 5901 &
 
-# Comment this out in Ubuntu 18.04
-pulseaudio --start
+export PATH="${PATH}:/opt/VirtualGL/bin:/opt/TurboVNC/bin"
 
 echo "Session Running. Press [Return] to exit."
 read

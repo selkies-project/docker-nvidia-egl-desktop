@@ -1,4 +1,5 @@
 FROM nvidia/opengl:1.2-glvnd-runtime-ubuntu20.04
+# Comment the line above and uncomment the line below for Ubuntu 18.04
 #FROM nvidia/opengl:1.2-glvnd-runtime-ubuntu18.04
 
 LABEL maintainer "https://github.com/ehfd"
@@ -25,7 +26,7 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Install desktop
+# Install MATE desktop and others
 RUN apt-get update && apt-get install -y \
         software-properties-common \
         apt-utils \
@@ -51,6 +52,8 @@ RUN apt-get update && apt-get install -y \
         python-numpy \
         python3 \
         python3-numpy \
+        dbus-x11 \
+        libdbus-c++-1-0v5 \
         x11-xkb-utils \
         xauth \
         xfonts-base \
@@ -69,7 +72,7 @@ RUN apt-get update && apt-get install -y \
         ubuntu-mate-desktop && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Vulkan
+# Install Vulkan (for headless applications)
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libvulkan1 \
         vulkan-utils && \
@@ -84,8 +87,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     }\n\
 }" > /etc/vulkan/icd.d/nvidia_icd.json
 
-# Sound driver including PulseAudio and GTK library
-# If you want to use sounds on docker, try 'pulseaudio --start'
+# Audio driver including PulseAudio and GTK library
+# If you want to use audio on docker, try 'pulseaudio --start' (but VNC does not support audio)
 RUN apt-get update && apt-get install -y --no-install-recommends \
         alsa \
         pulseaudio \
@@ -93,10 +96,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 # VirtualGL and TurboVNC
-ARG VIRTUALGL_VERSION=2.6.80
+ARG VIRTUALGL_VERSION=2.6.91
 ARG TURBOVNC_VERSION=2.2.80
-RUN curl -fsSL -O https://s3.amazonaws.com/virtualgl-pr/dev/linux/virtualgl_${VIRTUALGL_VERSION}_amd64.deb && \
-    curl -fsSL -O https://s3.amazonaws.com/virtualgl-pr/dev/linux/virtualgl32_${VIRTUALGL_VERSION}_amd64.deb && \
+RUN curl -fsSL -O https://s3.amazonaws.com/virtualgl-pr/main/linux/virtualgl_${VIRTUALGL_VERSION}_amd64.deb && \
+    curl -fsSL -O https://s3.amazonaws.com/virtualgl-pr/main/linux/virtualgl32_${VIRTUALGL_VERSION}_amd64.deb && \
     apt-get update && apt-get install -y --no-install-recommends ./virtualgl_${VIRTUALGL_VERSION}_amd64.deb ./virtualgl32_${VIRTUALGL_VERSION}_amd64.deb && \
     rm virtualgl_${VIRTUALGL_VERSION}_amd64.deb virtualgl32_${VIRTUALGL_VERSION}_amd64.deb && \
     chmod u+s /usr/lib/libvglfaker.so && \
@@ -116,18 +119,22 @@ no-pam-sessions\n\
 permitted-security-types = VNC, otp\
 " > /etc/turbovncserver-security.conf
 
+# Wine and Winetricks, comment out the below lines to disable
+ARG WINE_BRANCH=stable
+RUN curl -fsSL https://dl.winehq.org/wine-builds/winehq.key | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - && \
+    apt-add-repository "deb https://dl.winehq.org/wine-builds/ubuntu/ $(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2) main" && \
+    apt-get update && apt-get install -y --install-recommends winehq-${WINE_BRANCH} && \
+    rm -rf /var/lib/apt/lists/* && \
+    curl -fsSL -o /usr/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
+    chmod 755 /usr/bin/winetricks && \
+    curl -fsSL -o /usr/share/bash-completion/completions/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks.bash-completion
+
 # noVNC and Websockify
 ENV NOVNC_VERSION 1.2.0
 RUN curl -fsSL https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz | tar -xzf - -C /opt && \
     mv /opt/noVNC-${NOVNC_VERSION} /opt/noVNC && \
     ln -s /opt/noVNC/vnc.html /opt/noVNC/index.html && \
     git clone https://github.com/novnc/websockify /opt/noVNC/utils/websockify
-
-# Xorg segfault error mitigation
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        dbus-x11 \
-        libdbus-c++-1-0v5 && \
-    rm -rf /var/lib/apt/lists/*
 
 # Create user with password ${VNCPASS}
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -136,13 +143,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     groupadd -g 1000 user && \
     useradd -ms /bin/bash user -u 1000 -g 1000 && \
     # Remove 'render' group in Ubuntu 18.04
-    usermod -a -G adm,audio,cdrom,dialout,dip,fax,floppy,input,lpadmin,netdev,plugdev,render,scanner,ssh,sudo,tape,tty,video,voice user && \
+    usermod -a -G adm,audio,bluetooth,cdrom,dialout,dip,fax,floppy,input,lp,lpadmin,netdev,plugdev,render,scanner,ssh,sudo,tape,tty,video,voice user && \
     echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     chown -R user:user /home/user && \
     echo "user:${VNCPASS}" | chpasswd
 
-COPY bootstrap.sh /bootstrap.sh
-RUN chmod 755 /bootstrap.sh
+COPY bootstrap.sh /etc/bootstrap.sh
+RUN chmod 755 /etc/bootstrap.sh
 COPY supervisord.conf /etc/supervisord.conf
 RUN chmod 755 /etc/supervisord.conf
 
