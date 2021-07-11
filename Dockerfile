@@ -95,6 +95,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libgtk2.0-0 && \
     rm -rf /var/lib/apt/lists/*
 
+# Wine and Winetricks, comment out the below lines to disable
+ARG WINE_BRANCH=stable
+RUN curl -fsSL https://dl.winehq.org/wine-builds/winehq.key | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - && \
+    apt-add-repository "deb https://dl.winehq.org/wine-builds/ubuntu/ $(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2) main" && \
+    apt-get update && apt-get install -y --install-recommends winehq-${WINE_BRANCH} && \
+    rm -rf /var/lib/apt/lists/* && \
+    curl -fsSL -o /usr/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
+    chmod 755 /usr/bin/winetricks && \
+    curl -fsSL -o /usr/share/bash-completion/completions/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks.bash-completion
+
 # VirtualGL and TurboVNC
 ARG VIRTUALGL_VERSION=2.6.91
 ARG TURBOVNC_VERSION=2.2.80
@@ -118,16 +128,6 @@ no-x11-tcp-connections\n\
 no-pam-sessions\n\
 permitted-security-types = VNC, otp\
 " > /etc/turbovncserver-security.conf
-
-# Wine and Winetricks, comment out the below lines to disable
-ARG WINE_BRANCH=stable
-RUN curl -fsSL https://dl.winehq.org/wine-builds/winehq.key | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - && \
-    apt-add-repository "deb https://dl.winehq.org/wine-builds/ubuntu/ $(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2) main" && \
-    apt-get update && apt-get install -y --install-recommends winehq-${WINE_BRANCH} && \
-    rm -rf /var/lib/apt/lists/* && \
-    curl -fsSL -o /usr/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
-    chmod 755 /usr/bin/winetricks && \
-    curl -fsSL -o /usr/share/bash-completion/completions/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks.bash-completion
 
 # noVNC and Websockify
 ENV NOVNC_VERSION 1.2.0
