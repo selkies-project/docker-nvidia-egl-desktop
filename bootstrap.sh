@@ -27,9 +27,11 @@ done
 export PATH="${PATH}:/opt/VirtualGL/bin:/opt/TurboVNC/bin"
 export TVNC_WM=mate-session
 
-/opt/TurboVNC/bin/vncserver :0 -geometry "${SIZEW}x${SIZEH}" -depth "$CDEPTH" -vgl -noreset "$SHARESTRING" &
+/opt/TurboVNC/bin/vncserver :0 -geometry "${SIZEW}x${SIZEH}" -depth "$CDEPTH" -dpi 96 -vgl -noreset "$SHARESTRING" &
 
 /opt/noVNC/utils/launch.sh --vnc localhost:5900 --listen 5901 &
+
+#pulseaudio --start
 
 echo "Session Running. Press [Return] to exit."
 read

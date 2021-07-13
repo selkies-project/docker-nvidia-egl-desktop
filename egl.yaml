@@ -33,8 +33,6 @@ spec:
 #            secretKeyRef:
 #              name: egl-pass
 #              key: egl-pass
-        securityContext:
-          privileged: true
         stdin: true
         tty: true
         ports:
@@ -69,6 +67,7 @@ spec:
       - name: dshm
         emptyDir:
           medium: Memory
+# Replace this with the cluster's device plugin entry, the below is normally only valid in privileged mode
       - name: drm
         hostPath:
           path: /dev/dri
