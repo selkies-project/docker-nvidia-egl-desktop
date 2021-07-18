@@ -4,6 +4,8 @@ set -e
 trap "echo TRAPed signal" HUP INT QUIT KILL TERM
 
 echo "user:$VNCPASS" | sudo chpasswd
+sudo ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime && echo "$TZ" | sudo tee /etc/timezone > /dev/null
+export PATH="${PATH}:/opt/VirtualGL/bin:/opt/TurboVNC/bin"
 
 sudo /etc/init.d/dbus start
 
@@ -24,7 +26,6 @@ for DRM in /dev/dri/card*; do
   fi
 done
 
-export PATH="${PATH}:/opt/VirtualGL/bin:/opt/TurboVNC/bin"
 export TVNC_WM=mate-session
 
 /opt/TurboVNC/bin/vncserver :0 -geometry "${SIZEW}x${SIZEH}" -depth "$CDEPTH" -dpi 96 -vgl -noreset "$SHARESTRING" &

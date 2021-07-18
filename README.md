@@ -6,7 +6,7 @@ Use [docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-deskto
 
 Requires NVIDIA GPU drivers and corresponding container toolkits to be set up on the host for allocating GPUs.
 
-Connect to the spawned noVNC WebSocket instance with a browser in port 5901, no VNC client required (password for the default user is 'vncpasswd').
+Connect to the spawned noVNC WebSocket instance with a browser in port 5901, no installed VNC client is required (password for the default user is 'vncpasswd').
 
 Wine and Winetricks are bundled by default, comment out the installation section in **Dockerfile** if the user wants to remove them from the container.
 

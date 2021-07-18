@@ -67,7 +67,7 @@ spec:
       - name: dshm
         emptyDir:
           medium: Memory
-# Replace this with the cluster's device plugin entry, the below is normally only valid in privileged mode
+# Replace this and the above mountPath with the cluster's device plugin entry, the below is normally only valid in privileged mode
       - name: drm
         hostPath:
           path: /dev/dri
