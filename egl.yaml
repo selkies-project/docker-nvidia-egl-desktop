@@ -27,8 +27,8 @@ spec:
           value: "24"
         - name: SHARED
           value: "TRUE"
-        - name: VNCPASS
-          value: "vncpasswd"
+        - name: PASSWD
+          value: "mypasswd"
 #          valueFrom:
 #            secretKeyRef:
 #              name: egl-pass
@@ -36,7 +36,7 @@ spec:
         stdin: true
         tty: true
         ports:
-        - containerPort: 5901
+        - containerPort: 8080
           protocol: TCP
         resources:
           limits:
@@ -67,7 +67,7 @@ spec:
       - name: dshm
         emptyDir:
           medium: Memory
-# Replace this and the above mountPath with the cluster's device plugin entry, the below is normally only valid in privileged mode
+# Replace this and the above mountPath with the cluster's device plugin resource for the DRM device, the below is normally only valid in privileged mode
       - name: drm
         hostPath:
           path: /dev/dri
