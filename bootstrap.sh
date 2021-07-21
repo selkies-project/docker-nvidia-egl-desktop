@@ -3,6 +3,7 @@ set -e
 
 trap "echo TRAPed signal" HUP INT QUIT KILL TERM
 
+sudo chown -R user:user /home/user /opt/tomcat
 echo "user:$PASSWD" | sudo chpasswd
 sudo ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime && echo "$TZ" | sudo tee /etc/timezone > /dev/null
 export PATH="${PATH}:/opt/VirtualGL/bin:/opt/TurboVNC/bin:/opt/tomcat/bin"
@@ -44,7 +45,7 @@ echo "<user-mapping>
 " > ~/.guacamole/user-mapping.xml
 chmod 0600 ~/.guacamole/user-mapping.xml
 
-if [ "x$SHARED" == "xTRUE" ]; then
+if [ "x$SHARED" = "xTRUE" ]; then
   export SHARESTRING="-alwaysshared"
 fi
 

@@ -6,7 +6,7 @@ Use [docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-deskto
 
 Requires NVIDIA GPU drivers and corresponding container toolkits to be set up on the host for allocating GPUs.
 
-Connect to the spawned Apache Guacamole instance with a web browser in port 8080 (the username is 'user' and the default password is 'mypasswd'). No VNC client installation is required. Press Ctrl+Alt+Shift to toggle the configuration option in Guacamole. Click the fullscreen button in your web browser settings or press F11 after pressing Ctrl+Alt+Shift to bring up fullscreen.
+Connect to the spawned Apache Guacamole instance with a web browser in port 8080 (the username is "user" and the default password is "mypasswd"). No VNC client installation is required. Press Ctrl+Alt+Shift to toggle the configuration option in Guacamole. Click the fullscreen button in your web browser settings or press F11 after pressing Ctrl+Alt+Shift to bring up fullscreen.
 
 Wine and Winetricks are bundled by default, comment out the installation section in **Dockerfile** if the user wants to remove them from the container.
 

@@ -10,7 +10,7 @@ ARG NVIDIA_VISIBLE_DEVICES=all
 ARG DEBIAN_FRONTEND=noninteractive
 ENV NVIDIA_DRIVER_CAPABILITIES all
 
-# Default options (password is 'mypasswd')
+# Default options (password is "mypasswd")
 ENV TZ UTC
 ENV PASSWD mypasswd
 ENV SIZEW 1920
@@ -74,7 +74,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Wine and Winetricks, comment out the below lines to disable
 ARG WINE_BRANCH=stable
-RUN curl -fsSL https://dl.winehq.org/wine-builds/winehq.key | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - && \
+RUN if [ "$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2)" = "bionic" ]; then add-apt-repository ppa:cybermax-dexter/sdl2-backport; fi && \
+    curl -fsSL https://dl.winehq.org/wine-builds/winehq.key | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - && \
     apt-add-repository "deb https://dl.winehq.org/wine-builds/ubuntu/ $(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2) main" && \
     apt-get update && apt-get install -y --install-recommends winehq-${WINE_BRANCH} && \
     rm -rf /var/lib/apt/lists/* && \
@@ -103,7 +104,7 @@ RUN curl -fsSL -O https://sourceforge.net/projects/virtualgl/files/virtualgl_${V
 no-httpd\n\
 no-x11-tcp-connections\n\
 no-pam-sessions\n\
-permitted-security-types = VNC, otp\n\
+permitted-security-types = VNC, otp\
 " > /etc/turbovncserver-security.conf
 
 # Apache Guacamole
@@ -141,7 +142,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl -fsSL https://archive.apache.org/dist/tomcat/tomcat-$(echo $TOMCAT_VERSION | cut -d "." -f 1)/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz | tar -xzf - -C /opt && \
     mv /opt/apache-tomcat-$TOMCAT_VERSION /opt/tomcat && \
     git clone https://github.com/apache/guacamole-server.git /tmp/guacamole-server && \
-    cd /tmp/guacamole-server && autoreconf -fi && ./configure --with-init-dir=/etc/init.d && make && make install && ldconfig && cd / && rm -rf /tmp/guacamole-server && \
+    cd /tmp/guacamole-server && autoreconf -fi && ./configure --with-init-dir=/etc/init.d && make install && ldconfig && cd / && rm -rf /tmp/guacamole-server && \
     git clone https://github.com/apache/guacamole-client.git /tmp/guacamole-client && \
     cd /tmp/guacamole-client && JAVA_HOME=/usr/lib/jvm/default-java mvn package && rm -rf /opt/tomcat/webapps/* && mv guacamole/target/guacamole*.war /opt/tomcat/webapps/ROOT.war && chmod +x /opt/tomcat/webapps/ROOT.war && cd / && rm -rf /tmp/guacamole-client && \
     echo "load-module module-native-protocol-tcp auth-ip-acl=127.0.0.0/8 auth-anonymous=1" >> /etc/pulse/default.pa
