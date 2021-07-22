@@ -142,9 +142,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl -fsSL https://archive.apache.org/dist/tomcat/tomcat-$(echo $TOMCAT_VERSION | cut -d "." -f 1)/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz | tar -xzf - -C /opt && \
     mv /opt/apache-tomcat-$TOMCAT_VERSION /opt/tomcat && \
     git clone https://github.com/apache/guacamole-server.git /tmp/guacamole-server && \
-    cd /tmp/guacamole-server && autoreconf -fi && ./configure --with-init-dir=/etc/init.d && make install && ldconfig && cd / && rm -rf /tmp/guacamole-server && \
+    cd /tmp/guacamole-server && autoreconf -fi && ./configure --with-init-dir=/etc/init.d && make install && ldconfig && cd / && rm -rf /tmp/* && \
     git clone https://github.com/apache/guacamole-client.git /tmp/guacamole-client && \
-    cd /tmp/guacamole-client && JAVA_HOME=/usr/lib/jvm/default-java mvn package && rm -rf /opt/tomcat/webapps/* && mv guacamole/target/guacamole*.war /opt/tomcat/webapps/ROOT.war && chmod +x /opt/tomcat/webapps/ROOT.war && cd / && rm -rf /tmp/guacamole-client && \
+    cd /tmp/guacamole-client && JAVA_HOME=/usr/lib/jvm/default-java mvn package && rm -rf /opt/tomcat/webapps/* && mv guacamole/target/guacamole*.war /opt/tomcat/webapps/ROOT.war && chmod +x /opt/tomcat/webapps/ROOT.war && cd / && rm -rf /tmp/* && \
     echo "load-module module-native-protocol-tcp auth-ip-acl=127.0.0.0/8 auth-anonymous=1" >> /etc/pulse/default.pa
 
 # Create user with password ${PASSWD}
