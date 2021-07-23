@@ -20,7 +20,7 @@ ENV CDEPTH 24
 # Install locales to prevent errors
 RUN apt-get clean && \
     apt-get update && \
-    apt-get install --no-install-recommends -y locales && \
+    apt-get install -y --no-install-recommends locales && \
     rm -rf /var/lib/apt/lists/* && \
     locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
