@@ -15,7 +15,7 @@ spec:
       hostname: egl
       containers:
       - name: egl
-        image: ehfd/nvidia-egl-desktop:latest
+        image: ghcr.io/ehfd/nvidia-egl-desktop:latest
         env:
         - name: TZ
           value: "UTC"
