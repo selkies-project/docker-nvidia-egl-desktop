@@ -17,7 +17,7 @@ Note: Requires access to the corresponding **/dev/dri/cardX** and **/dev/dri/ren
 For Docker this will be sufficient (the container will not use DRM devices it is not allocated to, falling back to software acceleration if no devices work):
 
 ```
-docker run --gpus 1 --device=/dev/dri:rw -it -e TZ=UTC -e SIZEW=1920 -e SIZEH=1080 -e CDEPTH=24 -e SHARED=TRUE -e PASSWD=mypasswd -p 8080:8080 ghcr.io/ehfd/nvidia-egl-desktop:latest
+docker run --gpus 1 --device=/dev/dri:rw -it -e TZ=UTC -e SIZEW=1920 -e SIZEH=1080 -e CDEPTH=24 -e PASSWD=mypasswd -p 8080:8080 ghcr.io/ehfd/nvidia-egl-desktop:latest
 ```
 
 This work was supported in part by NSF awards CNS-1730158, ACI-1540112, ACI-1541349, OAC-1826967, the University of California Office of the President, and the University of California San Diego’s California Institute for Telecommunications and Information Technology/Qualcomm Institute. Thanks to CENIC for the 100Gbps networks.

@@ -4,7 +4,7 @@ FROM nvidia/opengl:1.2-glvnd-runtime-ubuntu20.04
 
 LABEL maintainer "https://github.com/ehfd"
 
-# Make all NVIDIA GPUS visible
+# Make all NVIDIA GPUs visible
 ARG NVIDIA_VISIBLE_DEVICES=all
 # Supress interactive menu while installing keyboard-configuration
 ARG DEBIAN_FRONTEND=noninteractive
@@ -159,8 +159,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     echo "user:${PASSWD}" | chpasswd && \
     ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
 
-COPY bootstrap.sh /etc/bootstrap.sh
-RUN chmod 755 /etc/bootstrap.sh
+COPY entrypoint.sh /etc/entrypoint.sh
+RUN chmod 755 /etc/entrypoint.sh
 COPY supervisord.conf /etc/supervisord.conf
 RUN chmod 755 /etc/supervisord.conf
 

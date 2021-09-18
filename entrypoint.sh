@@ -16,6 +16,17 @@ mkdir -p ~/.vnc
 echo "$PASSWD" | /opt/TurboVNC/bin/vncpasswd -f > ~/.vnc/passwd
 chmod 0600 ~/.vnc/passwd
 
+printf "3\nn\nx\n" | sudo /opt/VirtualGL/bin/vglserver_config
+for DRM in /dev/dri/card*; do
+  if /opt/VirtualGL/bin/eglinfo "$DRM"; then
+    export VGL_DISPLAY="$DRM"
+    break
+  fi
+done
+
+export TVNC_WM=mate-session
+/opt/TurboVNC/bin/vncserver :0 -geometry "${SIZEW}x${SIZEH}" -depth "$CDEPTH" -dpi 96 -vgl -alwaysshared -noreset &
+
 mkdir -p ~/.guacamole
 echo "<user-mapping>
     <authorize username=\"user\" password=\"$PASSWD\">
@@ -44,22 +55,6 @@ echo "<user-mapping>
 </user-mapping>
 " > ~/.guacamole/user-mapping.xml
 chmod 0600 ~/.guacamole/user-mapping.xml
-
-if [ "x$SHARED" = "xTRUE" ]; then
-  export SHARESTRING="-alwaysshared"
-fi
-
-printf "3\nn\nx\n" | sudo /opt/VirtualGL/bin/vglserver_config
-
-for DRM in /dev/dri/card*; do
-  if /opt/VirtualGL/bin/eglinfo "$DRM"; then
-    export VGL_DISPLAY="$DRM"
-    break
-  fi
-done
-
-export TVNC_WM=mate-session
-/opt/TurboVNC/bin/vncserver :0 -geometry "${SIZEW}x${SIZEH}" -depth "$CDEPTH" -dpi 96 -vgl -noreset "$SHARESTRING" &
 
 /opt/tomcat/bin/catalina.sh run &
 guacd -b 0.0.0.0 -f &
