@@ -32,6 +32,8 @@ if [ -n "$(sudo nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
   export VGL_REFRESHRATE="$REFRESH"
   vglrun +wm mate-session &
 else
+  export LIBGL_ALWAYS_SOFTWARE="true"
+  export GALLIUM_DRIVER="llvmpipe"
   mate-session &
 fi
 
