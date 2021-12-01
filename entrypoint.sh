@@ -12,7 +12,7 @@ sudo /etc/init.d/dbus start
 source /opt/gstreamer/gst-env
 
 export DISPLAY=":0"
-Xvfb -screen "${DISPLAY}" "8192x4096x${CDEPTH}" -dpi "${DPI}" +extension "RANDR" +extension "RENDER" +extension "GLX" +extension "MIT-SHM" -nolisten "tcp" -noreset -shmem &
+Xvfb "${DISPLAY}" -ac -screen "0" "8192x4096x${CDEPTH}" -dpi "${DPI}" +extension "RANDR" +extension "GLX" +iglx +extension "MIT-SHM" +render -nolisten "tcp" -noreset -shmem &
 
 # Wait for X11 to start
 echo "Waiting for X socket"
@@ -32,8 +32,6 @@ if [ -n "$(sudo nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
   export VGL_REFRESHRATE="$REFRESH"
   vglrun +wm mate-session &
 else
-  export LIBGL_ALWAYS_SOFTWARE="true"
-  export GALLIUM_DRIVER="llvmpipe"
   mate-session &
 fi
 
