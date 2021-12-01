@@ -1,63 +1,39 @@
-#!/bin/bash
-set -e
+#!/bin/bash -e
 
 trap "echo TRAPed signal" HUP INT QUIT KILL TERM
 
-sudo chown -R user:user /home/user /opt/tomcat
+sudo chown user:user /home/user
 echo "user:$PASSWD" | sudo chpasswd
+sudo rm -rf /tmp/.X*
 sudo ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime && echo "$TZ" | sudo tee /etc/timezone > /dev/null
-export PATH="${PATH}:/opt/VirtualGL/bin:/opt/TurboVNC/bin:/opt/tomcat/bin"
+export PATH="${PATH}:/opt/VirtualGL/bin"
 
-sudo /etc/init.d/ssh start
 sudo /etc/init.d/dbus start
-pulseaudio --start
+source /opt/gstreamer/gst-env
 
-mkdir -p ~/.vnc
-echo "$PASSWD" | /opt/TurboVNC/bin/vncpasswd -f > ~/.vnc/passwd
-chmod 0600 ~/.vnc/passwd
+export DISPLAY=":0"
+Xvfb -screen "${DISPLAY}" "8192x4096x${CDEPTH}" -dpi "${DPI}" +extension "RANDR" +extension "RENDER" +extension "GLX" +extension "MIT-SHM" -nolisten "tcp" -noreset -shmem &
 
-printf "3\nn\nx\n" | sudo /opt/VirtualGL/bin/vglserver_config
-for DRM in /dev/dri/card*; do
-  if /opt/VirtualGL/bin/eglinfo "$DRM"; then
-    export VGL_DISPLAY="$DRM"
-    break
-  fi
-done
+# Wait for X11 to start
+echo "Waiting for X socket"
+until [ -S "/tmp/.X11-unix/X${DISPLAY/:/}" ]; do sleep 1; done
+echo "X socket is ready"
 
-export TVNC_WM=mate-session
-/opt/TurboVNC/bin/vncserver :0 -geometry "${SIZEW}x${SIZEH}" -depth "$CDEPTH" -dpi 96 -vgl -alwaysshared -noreset &
+selkies-gstreamer-resize "${SIZEW}x${SIZEH}"
 
-mkdir -p ~/.guacamole
-echo "<user-mapping>
-    <authorize username=\"user\" password=\"$PASSWD\">
-        <connection name=\"VNC\">
-            <protocol>vnc</protocol>
-            <param name=\"hostname\">localhost</param>
-            <param name=\"port\">5900</param>
-            <param name=\"autoretry\">10</param>
-            <param name=\"password\">$PASSWD</param>
-            <param name=\"enable-sftp\">true</param>
-            <param name=\"sftp-hostname\">localhost</param>
-            <param name=\"sftp-username\">user</param>
-            <param name=\"sftp-password\">$PASSWD</param>
-            <param name=\"sftp-directory\">/home/user</param>
-            <param name=\"enable-audio\">true</param>
-            <param name=\"audio-servername\">localhost</param>
-        </connection>
-        <connection name=\"SSH\">
-            <protocol>ssh</protocol>
-            <param name=\"hostname\">localhost</param>
-            <param name=\"username\">user</param>
-            <param name=\"password\">$PASSWD</param>
-            <param name=\"enable-sftp\">true</param>
-        </connection>
-    </authorize>
-</user-mapping>
-" > ~/.guacamole/user-mapping.xml
-chmod 0600 ~/.guacamole/user-mapping.xml
+if [ "$NOVNC_ENABLE" = "true" ]; then
+  sudo x11vnc -display "${DISPLAY}" -passwd "${BASIC_AUTH_PASSWORD:-$PASSWD}" -shared -forever -repeat -xkb -xrandr "resize" -rfbport 5900 &
+  /opt/noVNC/utils/novnc_proxy --vnc localhost:5900 --listen 8080 --heartbeat 10 &
+fi
 
-/opt/tomcat/bin/catalina.sh run &
-guacd -b 0.0.0.0 -f &
+# Add custom processes below this section or within `supervisord.conf`
+if [ -n "$(sudo nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
+  export VGL_DISPLAY="egl"
+  export VGL_REFRESHRATE="$REFRESH"
+  vglrun +wm mate-session &
+else
+  mate-session &
+fi
 
 echo "Session Running. Press [Return] to exit."
 read
