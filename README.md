@@ -1,12 +1,12 @@
 # docker-nvidia-egl-desktop
 
-MATE Desktop container designed for Kubernetes with direct access to the GPU with EGL using VirtualGL for NVIDIA GPUs with WebRTC and HTML5, providing an open source remote cloud graphics or game streaming platform. Does not require `/tmp/.X11-unix` host sockets or host configuration.
+MATE Desktop container designed for Kubernetes with direct access to the GPU with EGL using VirtualGL for GPUs with WebRTC and HTML5, providing an open source remote cloud graphics or game streaming platform. Does not require `/tmp/.X11-unix` host sockets or host configuration.
 
 Use [docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-desktop) for a MATE Desktop container with better performance, also including Vulkan support for NVIDIA GPUs by spawning its own X Server without using `/tmp/.X11-unix` host sockets.
 
 ### Usage
 
-Container startup could take some time at first launch as it automatically installs NVIDIA drivers compatible with the host.
+This container is composed fully of vendor-neutral applications and protocols except the NVIDIA base container itself, meaning that there is nothing stopping you from using this container with GPUs of other vendors including AMD and Intel (as a hint use the respective vendor's container runtime or Kubernetes device plugin and make sure that it provisions `/dev/dri/cardX` devices, then set `WEBRTC_ENCODER` to the value `x264enc` if using the selkies-gstreamer WebRTC interface). However, this is not officially supported as the maintainers only use NVIDIA hardware. This container also supports running without any GPUs with software fallback (set `WEBRTC_ENCODER` to the value `x264enc` if using the selkies-gstreamer WebRTC interface).
 
 Wine, Winetricks, and PlayOnLinux are bundled by default. Comment out the section where it is installed within `Dockerfile` if the user wants to remove them from the container.
 
