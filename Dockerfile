@@ -68,7 +68,7 @@ RUN dpkg --add-architecture i386 && \
         dbus-x11 \
         libdbus-c++-1-0v5 \
         xvfb && \
-    apt-get install -y ubuntu-mate-desktop && \
+    apt-get install -y ubuntu-mate-desktop libreoffice && \
     # Remove Bluetooth packages that throw errors
     apt-get autoremove --purge -y \
         blueman \
