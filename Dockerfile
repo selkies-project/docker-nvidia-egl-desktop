@@ -180,8 +180,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
         libxtst-dev \
         libavahi-client-dev && \
     rm -rf /var/lib/apt/lists/* && \
-    git clone https://github.com/LibVNC/x11vnc.git /tmp/x11vnc && \
-    cd /tmp/x11vnc && autoreconf -fi && ./configure && make install && cd / && rm -rf /tmp/* && \
+    LibVNC_VERSION=$(curl -fsSL "https://api.github.com/repos/LibVNC/x11vnc/releases/latest" | jq -r '.tag_name' | sed 's/[^0-9\.\-]*//g') && \
+    curl -fsSL https://github.com/LibVNC/x11vnc/archive/refs/tags/${LibVNC_VERSION}.tar.gz | tar -xzf - -C /tmp && \
+    cd /tmp/x11vnc-${LibVNC_VERSION} && autoreconf -fi && ./configure && make install && cd / && rm -rf /tmp/* && \
     NOVNC_VERSION=$(curl -fsSL "https://api.github.com/repos/noVNC/noVNC/releases/latest" | jq -r '.tag_name' | sed 's/[^0-9\.\-]*//g') && \
     curl -fsSL https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz | tar -xzf - -C /opt && \
     mv /opt/noVNC-${NOVNC_VERSION} /opt/noVNC && \
