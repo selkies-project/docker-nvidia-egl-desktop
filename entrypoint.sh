@@ -32,9 +32,9 @@ fi
 if [ -n "$(sudo nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
   export VGL_DISPLAY="egl"
   export VGL_REFRESHRATE="$REFRESH"
-  vglrun +wm mate-session &
+  vglrun +wm xfce4-session &
 else
-  mate-session &
+  xfce4-session &
 fi
 
 # Fix selkies-gstreamer keyboard mapping

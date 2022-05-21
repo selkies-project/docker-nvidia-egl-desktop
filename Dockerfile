@@ -1,6 +1,6 @@
 # Ubuntu release versions 18.04 and 20.04 are supported
 ARG UBUNTU_RELEASE=20.04
-ARG CUDA_VERSION=11.4.2
+ARG CUDA_VERSION=11.2.2
 FROM nvcr.io/nvidia/cudagl:${CUDA_VERSION}-runtime-ubuntu${UBUNTU_RELEASE}
 
 LABEL maintainer "https://github.com/ehfd,https://github.com/danisla"
@@ -42,19 +42,27 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Install Xvfb, MATE Desktop, and others
+# Install Xvfb, Xfce Desktop, and others
 RUN dpkg --add-architecture i386 && \
     apt-get update && apt-get install --no-install-recommends -y \
         software-properties-common \
+        apt-transport-https \
         apt-utils \
         build-essential \
         ca-certificates \
+        cups-filters \
+        cups-common \
+        cups-pdf \
         curl \
         file \
         wget \
+        bzip2 \
         gzip \
+        p7zip-full \
+        xz-utils \
         zip \
         unzip \
+        zstd \
         gcc \
         git \
         jq \
@@ -62,28 +70,105 @@ RUN dpkg --add-architecture i386 && \
         python \
         python-numpy \
         python3 \
+        python3-cups \
         python3-numpy \
         mlocate \
         nano \
         vim \
         htop \
         firefox \
+        transmission-gtk \
+        qpdfview \
+        xarchiver \
+        brltty \
+        brltty-x11 \
+        desktop-file-utils \
+        fonts-dejavu-core \
+        fonts-freefont-ttf \
+        fonts-noto \
+        fonts-noto-cjk \
+        fonts-noto-cjk-extra \
+        fonts-noto-color-emoji \
+        fonts-noto-hinted \
+        fonts-noto-mono \
+        fonts-opensymbol \
+        fonts-symbola \
+        fonts-ubuntu \
+        gucharmap \
+        mpd \
+        onboard \
+        orage \
+        parole \
+        policykit-desktop-privileges \
+        libpulse0 \
+        pulseaudio \
+        pavucontrol \
+        ristretto \
         supervisor \
+        thunar \
+        thunar-volman \
+        thunar-archive-plugin \
+        thunar-media-tags-plugin \
         net-tools \
+        libgtk-3-bin \
         vainfo \
         vdpauinfo \
         mesa-utils \
         mesa-utils-extra \
+        xdg-utils \
         dbus-x11 \
         libdbus-c++-1-0v5 \
-        xvfb && \
-    apt-get install -y ubuntu-mate-desktop libreoffice && \
+        dmz-cursor-theme \
+        numlockx \
+        xcursor-themes \
+        xvfb \
+        xubuntu-artwork \
+        xfburn \
+        xfpanel-switch \
+        xfce4 \
+        xfdesktop4 \
+        xfwm4 \
+        xfce4-appfinder \
+        xfce4-clipman \
+        xfce4-dict \
+        xfce4-goodies \
+        xfce4-notes \
+        xfce4-notifyd \
+        xfce4-panel \
+        xfce4-screenshooter \
+        xfce4-session \
+        xfce4-settings \
+        xfce4-taskmanager \
+        xfce4-terminal \
+        xfce4-appmenu-plugin \
+        xfce4-battery-plugin \
+        xfce4-clipman-plugin \
+        xfce4-cpufreq-plugin \
+        xfce4-cpugraph-plugin \
+        xfce4-diskperf-plugin \
+        xfce4-datetime-plugin \
+        xfce4-fsguard-plugin \
+        xfce4-genmon-plugin \
+        xfce4-indicator-plugin \
+        xfce4-mpc-plugin \
+        xfce4-mount-plugin \
+        xfce4-netload-plugin \
+        xfce4-notes-plugin \
+        xfce4-places-plugin \
+        xfce4-pulseaudio-plugin \
+        xfce4-sensors-plugin \
+        xfce4-smartbookmark-plugin \
+        xfce4-statusnotifier-plugin \
+        xfce4-systemload-plugin \
+        xfce4-timer-plugin \
+        xfce4-verve-plugin \
+        xfce4-weather-plugin \
+        xfce4-whiskermenu-plugin \
+        xfce4-xkb-plugin && \
+    apt-get install -y libreoffice && \
+    cp -rf /etc/xdg/xfce4/panel/default.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml && \
     # Support libva and VA-API through NVIDIA VDPAU
     curl -fsSL -o /tmp/vdpau-va-driver.deb "https://launchpad.net/~saiarcot895/+archive/ubuntu/chromium-dev/+files/vdpau-va-driver_0.7.4-6ubuntu2~ppa1~18.04.1_amd64.deb" && apt-get install --no-install-recommends -y /tmp/vdpau-va-driver.deb && rm -rf /tmp/* && \
-    # Remove Bluetooth packages that throw errors
-    apt-get autoremove --purge -y \
-        blueman \
-        pulseaudio-module-bluetooth && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Vulkan (for offscreen rendering only)
@@ -104,8 +189,11 @@ ARG WINE_BRANCH=devel
 RUN if [ "${UBUNTU_RELEASE}" = "18.04" ]; then add-apt-repository ppa:cybermax-dexter/sdl2-backport; fi && \
     curl -fsSL -o /usr/share/keyrings/winehq-archive.key "https://dl.winehq.org/wine-builds/winehq.key" && \
     curl -fsSL -o "/etc/apt/sources.list.d/winehq-$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2).sources" "https://dl.winehq.org/wine-builds/ubuntu/dists/$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2)/winehq-$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2).sources" && \
-    apt-get update && apt-get install -y \
-        winehq-${WINE_BRANCH} \
+    add-apt-repository ppa:lutris-team/lutris && \
+    apt-get update && apt-get install --install-recommends -y \
+        winehq-${WINE_BRANCH} && \
+    apt-get update && apt-get install --no-install-recommends -y \
+        lutris \
         q4wine \
         playonlinux && \
     rm -rf /var/lib/apt/lists/* && \
@@ -114,7 +202,7 @@ RUN if [ "${UBUNTU_RELEASE}" = "18.04" ]; then add-apt-repository ppa:cybermax-d
     curl -fsSL -o /usr/share/bash-completion/completions/winetricks "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks.bash-completion"
 
 # Install VirtualGL
-RUN VIRTUALGL_VERSION=$(curl -fsSL "https://api.github.com/repos/VirtualGL/virtualgl/releases/53757413" | jq -r '.tag_name' | sed 's/[^0-9\.\-]*//g') && \
+RUN VIRTUALGL_VERSION=$(curl -fsSL "https://api.github.com/repos/VirtualGL/virtualgl/releases/67016359" | jq -r '.tag_name' | sed 's/[^0-9\.\-]*//g') && \
     curl -fsSL -O https://sourceforge.net/projects/virtualgl/files/virtualgl_${VIRTUALGL_VERSION}_amd64.deb && \
     curl -fsSL -O https://sourceforge.net/projects/virtualgl/files/virtualgl32_${VIRTUALGL_VERSION}_amd64.deb && \
     apt-get update && apt-get install -y --no-install-recommends ./virtualgl_${VIRTUALGL_VERSION}_amd64.deb ./virtualgl32_${VIRTUALGL_VERSION}_amd64.deb && \
@@ -212,7 +300,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     rm -rf /var/lib/apt/lists/* && \
     groupadd -g 1000 user && \
     useradd -ms /bin/bash user -u 1000 -g 1000 && \
-    usermod -a -G adm,audio,cdrom,dialout,dip,fax,floppy,input,lp,lpadmin,netdev,plugdev,scanner,ssh,sudo,tape,tty,video,voice user && \
+    usermod -a -G adm,audio,cdrom,dialout,dip,fax,floppy,input,lp,lpadmin,plugdev,scanner,sudo,tape,tty,video,voice user && \
     echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     chown user:user /home/user && \
     echo "user:${PASSWD}" | chpasswd && \

@@ -1,8 +1,8 @@
 # docker-nvidia-egl-desktop
 
-MATE Desktop container designed for Kubernetes with direct access to the GPU with EGL using VirtualGL for GPUs with WebRTC and HTML5, providing an open source remote cloud graphics or game streaming platform. Does not require `/tmp/.X11-unix` host sockets or host configuration.
+Xfce Desktop container designed for Kubernetes with direct access to the GPU with EGL using VirtualGL for GPUs with WebRTC and HTML5, providing an open source remote cloud graphics or game streaming platform. Does not require `/tmp/.X11-unix` host sockets or host configuration.
 
-Use [docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-desktop) for a MATE Desktop container with better performance, also including Vulkan support for NVIDIA GPUs by spawning its own X Server without using `/tmp/.X11-unix` host sockets.
+Use [docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-desktop) for an Xfce Desktop container with better performance, also including Vulkan support for NVIDIA GPUs by spawning its own X Server without using `/tmp/.X11-unix` host sockets.
 
 ### Usage
 
@@ -60,9 +60,9 @@ Note that this section is only required for the selkies-gstreamer WebRTC HTML5 i
 
 In most cases when either of your server or client has a permissive firewall, the default Google STUN server configuration will work without additional configuration. However, when connecting from networks that cannot be traversed with STUN, a TURN server is required. Provide the TURN server address, port, and shared secret in order to take advantage of the TURN relay capabilities and improve connection success.
 
-An open source TURN server that can be used is [coTURN](https://github.com/coturn/coturn), and an [example container implementation](https://github.com/selkies-project/selkies-gstreamer/tree/master/addons/coturn) `ghcr.io/selkies-project/selkies-gstreamer/coturn:latest` is available. For dynamic IP addresses, [dynamic-coturn](https://github.com/mreichardt95/dynamic-coturn) is a container implementation which restarts the TURN server whenever the public IP address gets changed. [Pion TURN](https://github.com/pion/turn) is another TURN server implementation compatible with all major operating systems, and [restund](https://openwrt.org/packages/pkgdata/restund) is a TURN server implementation for OpenWRT.
+An open source TURN server that can be used is [coTURN](https://github.com/coturn/coturn), and an [example container implementation](https://github.com/selkies-project/selkies-gstreamer/tree/master/addons/coturn) `ghcr.io/selkies-project/selkies-gstreamer/coturn:latest` is available. For dynamic IP addresses, [dynamic-coturn](https://github.com/mreichardt95/dynamic-coturn) is a container implementation which restarts the TURN server whenever the public IP address gets changed. [Pion TURN](https://github.com/pion/turn) is another TURN server implementation compatible with all major operating systems including Windows.
 
-The [Numb STUN/TURN Server](https://numb.viagenie.ca) is a free TURN server instance that may be used for personal purposes upon registration, but may not be optimal for production usage.
+[Open Relay](https://www.metered.ca/tools/openrelay) and the [Numb STUN/TURN Server](https://numb.viagenie.ca) are free TURN server instances that may be used for personal purposes, but may not be optimal for production usage.
 
 With Docker, use the `-e` option to add the `TURN_HOST`, `TURN_PORT` environment variables. You also require to provide either just `TURN_SHARED_SECRET` for time-limited shared secret TURN authentication, or both `TURN_USERNAME` and `TURN_PASSWORD` for legacy long term TURN authentication, depending on your TURN server configuration. Provide just one of these authentication methods, not both.
 
