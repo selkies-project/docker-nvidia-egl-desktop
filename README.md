@@ -1,8 +1,8 @@
 # docker-nvidia-egl-desktop
 
-Xfce Desktop container designed for Kubernetes with direct access to the GPU with EGL using VirtualGL for GPUs with WebRTC and HTML5, providing an open source remote cloud graphics or game streaming platform. Does not require `/tmp/.X11-unix` host sockets or host configuration.
+Xfce Desktop container designed for Kubernetes with direct access to the GPU with EGL using VirtualGL and Vulkan for GPUs with WebRTC and HTML5, providing an open source remote cloud graphics or game streaming platform. Does not require `/tmp/.X11-unix` host sockets or host configuration.
 
-This container only supports Vulkan with offscreen rendering incompletely. Use [docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-desktop) for an Xfce Desktop container with better performance, also including full Vulkan support for NVIDIA GPUs by spawning its own X Server without using `/tmp/.X11-unix` host sockets.
+Use [docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-desktop) for an Xfce Desktop container with better performance, with fully optimized OpenGL and Vulkan for NVIDIA GPUs by spawning its own fully isolated X Server instead of using `/tmp/.X11-unix` host sockets.
 
 **Read the [Troubleshooting](#troubleshooting) section first before raising an issue. Support is also available with the [Selkies Discord](https://discord.gg/wDNGDeSW5F).**
 
@@ -182,11 +182,11 @@ kubectl create secret generic turn-password --from-literal=turn-password=MY_TURN
 
 ### Comparison
 
-[docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-desktop): It's generally recommended to use docker-nvidia-glx-desktop when possible for maximum capabilities and performance. It starts its own X server inside the container without exposure to security risks. However, docker-nvidia-egl-desktop is versatile in various environments and has less processes running, meaning less possible errors. It is also possible to be used in HPC clusters with Apptainer/Singularity available, and sharing a GPU with multiple containers is also possible. Unofficial support for Intel and AMD GPUs are also available.
+[docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-desktop): It's generally recommended to use docker-nvidia-glx-desktop when possible for maximum capabilities and performance. It starts its own X server inside the container without exposure to security risks. However, docker-nvidia-egl-desktop is versatile in various environments and has less processes running, meaning less possible errors. It is also possible to be used in HPC clusters with Apptainer/Singularity available, and sharing a GPU with multiple containers is also possible. Unofficial support for Intel and AMD GPUs is also available.
 
 [Sunshine](https://github.com/LizardByte/Sunshine): This repository is an open-source server for NVIDIA's GameStream protocol, supporting all clients that can install [Moonlight](https://github.com/moonlight-stream). Try it if you don't need username/password authentication and you don't need to use containers. [Games on Whales](https://github.com/games-on-whales/gow) is a container implementation of Sunshine. However, many container ports have to be accessible to the internet, and because of its requirement for the `/dev/uinput` device, unsafe `privileged` access for containers are required. The [selkies-gstreamer](https://github.com/selkies-project/selkies-gstreamer) project, which is integrated to our container, does not require more than one port open from the container (TURN server may be required but can be deployed in a different environment with flexibility), and has almost equal performance while using only a web browser as a client.
 
-[x11docker](https://github.com/mviereck/x11docker): This has a lot of features and is very solid if you are the sole user in full control of the host. However, it starts a lot of processes in the host and is nearly impossible to contain the environment. Kubernetes is also not supported. The docker-nvidia-egl-desktop and the docker-nvidia-glx-desktop repositories contain everything in the container, with the only requirement being the NVIDIA Container Toolkit with adequate `NVIDIA_DRIVER_CAPABILITIES`, meaning that the container is portable anywhere Docker/Podman or Kubernetes can be run.
+[x11docker](https://github.com/mviereck/x11docker): This has a lot of features and is very solid if you are the sole user in full control of the host. However, it starts a lot of processes in the host and is nearly impossible to contain the environment. Kubernetes is also not supported. The docker-nvidia-egl-desktop repository contains everything in the container, with the only requirement being the NVIDIA Container Toolkit with adequate `NVIDIA_DRIVER_CAPABILITIES`, meaning that the container is portable anywhere Docker/Podman or Kubernetes can be run.
 
 [Xpra](https://github.com/Xpra-org/xpra): This is a feature-complete all-in-one remote desktop application optimized for Linux, although not exactly meant for full screen workloads and its HTML5 web interface is not optimized for intensive graphics workloads. Supports various protocols and various hardware acceleration methods.
 
@@ -210,13 +210,13 @@ kubectl create secret generic turn-password --from-literal=turn-password=MY_TURN
 
 Check that the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) is configured in the host. If you did that, scroll down.
 
-#### I want to use a specific GPU for OpenGL rendering when I have multiple GPUs in a container.
+#### I want to use a specific GPU for OpenGL rendering when I have multiple GPUs in one container.
 
-Use the `VGL_DISPLAY` environment variable, but only do so after you understand what it implicates with VirtualGL. Valid values are either `egl[n]`, or `/dev/dri/card[n]` only when `--device=/dev/dri` was used for the container (`[n]` is the order of the GPUs, where simply `egl` without the number is same as `egl0`). Note that `--gpus 1` means any single GPU, not the GPU device ID of 1. Use `docker --gpus '"device=1,2"'` to provision GPUs with device IDs 1 and 2 to the container.
+Use the `VGL_DISPLAY` environment variable, but only do so after you understand what it implicates with VirtualGL. Valid values are either `egl[n]`, or `/dev/dri/card[n]` only when `--device=/dev/dri` was used for the container (`[n]` is the order of the GPUs, where simply `egl` without the number is the same as `egl0`). Note that `docker --gpus 1` means any single GPU, not the GPU device ID of 1. Use `docker --gpus '"device=1,2"'` to provision GPUs with device IDs 1 and 2 to the container.
 
 #### Vulkan does not work.
 
-Use [docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-desktop), as this container does not guarantee that Vulkan works. If you want to use offscreen rendering (even this is not guaranteed) with this container, make sure that the `NVIDIA_DRIVER_CAPABILITIES` environment variable is set to `all` or includes all of `utility`, `graphics`, `video`, and `display`. The `display` capability is especially crucial to Vulkan, but the container does start without `display`, even with its name.
+Make sure that the `NVIDIA_DRIVER_CAPABILITIES` environment variable is set to `all` or includes all of `utility`, `graphics`, `video`, and `display`. The `display` capability is especially crucial to Vulkan, but the container does start without `display`, even with its name. AMD and Intel GPUs are not tested and therefore Vulkan is not guaranteed to work. A Vulkan ICD file is probably required to be added. People are welcome to share their experiences, however.
 
 ---
 This project involved a collaboration effort with [Itopia](https://itopia.com)'s [Dan Isla](https://github.com/danisla) (founder of the [Selkies Project](https://github.com/selkies-project)), incorporating the [selkies-gstreamer](https://github.com/selkies-project/selkies-gstreamer) WebRTC remote desktop streaming application. Commercial support for this container may be available from [Itopia](https://itopia.com).
