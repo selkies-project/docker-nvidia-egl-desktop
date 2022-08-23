@@ -13,6 +13,8 @@ sudo /etc/init.d/dbus start
 source /opt/gstreamer/gst-env
 
 export DISPLAY=":0"
+export __GL_SYNC_TO_VBLANK="0"
+export __NV_PRIME_RENDER_OFFLOAD="1"
 Xvfb "${DISPLAY}" -ac -screen "0" "8192x4096x${CDEPTH}" -dpi "${DPI}" +extension "RANDR" +extension "GLX" +iglx +extension "MIT-SHM" +render -nolisten "tcp" -noreset -shmem &
 
 # Wait for X11 to start
@@ -22,15 +24,15 @@ echo "X socket is ready"
 
 selkies-gstreamer-resize "${SIZEW}x${SIZEH}"
 
-if [ "$NOVNC_ENABLE" = "true" ]; then
+if [ "${NOVNC_ENABLE,,}" = "true" ]; then
   if [ -n "$NOVNC_VIEWPASS" ]; then export NOVNC_VIEWONLY="-viewpasswd ${NOVNC_VIEWPASS}"; else unset NOVNC_VIEWONLY; fi
-  sudo x11vnc -display "${DISPLAY}" -passwd "${BASIC_AUTH_PASSWORD:-$PASSWD}" -shared -forever -repeat -xkb -xrandr "resize" -rfbport 5900 ${NOVNC_VIEWONLY} &
+  x11vnc -display "${DISPLAY}" -passwd "${BASIC_AUTH_PASSWORD:-$PASSWD}" -shared -forever -repeat -xkb -snapfb -threads -xrandr "resize" -rfbport 5900 ${NOVNC_VIEWONLY} &
   /opt/noVNC/utils/novnc_proxy --vnc localhost:5900 --listen 8080 --heartbeat 10 &
 fi
 
-# Add custom processes below this section or within `supervisord.conf`
-if [ -n "$(sudo nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
-  export VGL_DISPLAY="egl"
+# Add custom processes below this section, or within `supervisord.conf` to perform service management like systemd
+if [ -n "$(nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
+  export VGL_DISPLAY="${VGL_DISPLAY:-egl}"
   export VGL_REFRESHRATE="$REFRESH"
   vglrun +wm xfce4-session &
 else
@@ -38,7 +40,7 @@ else
 fi
 
 # Fix selkies-gstreamer keyboard mapping
-if [ "$NOVNC_ENABLE" != "true" ]; then
+if [ "${NOVNC_ENABLE,,}" != "true" ]; then
   sudo xmodmap -e "keycode 94 shift = less less"
 fi
 
