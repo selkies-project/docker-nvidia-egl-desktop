@@ -170,7 +170,7 @@ RUN if [ "${UBUNTU_RELEASE}" = "18.04" ]; then apt-get update && apt-get install
     rm -rf /var/lib/apt/lists/* && \
     VULKAN_API_VERSION=$(dpkg -s libvulkan1 | grep -oP 'Version: [0-9|\.]+' | grep -oP '[0-9]+(\.[0-9]+)(\.[0-9]+)') && \
     mkdir -p /etc/vulkan/icd.d/ && \
-    echo -e "{\n\
+    echo "{\n\
     \"file_format_version\" : \"1.0.0\",\n\
     \"ICD\": {\n\
         \"library_path\": \"libGLX_nvidia.so.0\",\n\
