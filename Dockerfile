@@ -7,22 +7,25 @@ LABEL maintainer "https://github.com/ehfd,https://github.com/danisla"
 
 ARG UBUNTU_RELEASE
 ARG CUDA_VERSION
-# Make all NVIDIA GPUs visible, but we want to manually install drivers
+# Make all NVIDIA GPUs visible by default
 ARG NVIDIA_VISIBLE_DEVICES=all
+# Use noninteractive mode to skip confirmation when installing packages
 ARG DEBIAN_FRONTEND=noninteractive
+# All NVIDIA driver capabilities should preferably be used, check `NVIDIA_DRIVER_CAPABILITIES` inside the container if things do not work
 ENV NVIDIA_DRIVER_CAPABILITIES all
+# System defaults that should not be changed
 ENV DISPLAY :0
 ENV PULSE_SERVER 127.0.0.1:4713
 ENV XDG_RUNTIME_DIR /tmp
 
 # Default environment variables (password is "mypasswd")
 ENV TZ UTC
-ENV VGL_DISPLAY egl
 ENV SIZEW 1920
 ENV SIZEH 1080
 ENV REFRESH 60
 ENV DPI 96
 ENV CDEPTH 24
+ENV VGL_DISPLAY egl
 ENV PASSWD mypasswd
 ENV NOVNC_ENABLE false
 ENV WEBRTC_ENCODER nvh264enc
@@ -30,7 +33,7 @@ ENV WEBRTC_ENABLE_RESIZE false
 ENV ENABLE_AUDIO true
 ENV ENABLE_BASIC_AUTH true
 
-# Install locales to prevent errors
+# Install locales to prevent Xorg errors
 RUN apt-get clean && \
     apt-get update && apt-get install --no-install-recommends -y locales && \
     rm -rf /var/lib/apt/lists/* && \
@@ -39,7 +42,7 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Install Xvfb, Xfce Desktop, and others
+# Install Xorg, Xfce4 desktop environment, and other utility packages
 RUN dpkg --add-architecture i386 && \
     apt-get update && apt-get install --no-install-recommends -y \
         software-properties-common \
@@ -161,13 +164,15 @@ RUN dpkg --add-architecture i386 && \
         xfce4-weather-plugin \
         xfce4-whiskermenu-plugin \
         xfce4-xkb-plugin && \
+    # Install LibreOffice with the recommended packages
     apt-get install -y libreoffice && \
+    # Prevent dialogs at desktop environment start
     cp -rf /etc/xdg/xfce4/panel/default.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml && \
-    # Support libva and VA-API through NVIDIA VDPAU
+    # Support decoding from libva or VA-API through NVIDIA VDPAU
     curl -fsSL -o /tmp/vdpau-va-driver.deb "https://launchpad.net/~saiarcot895/+archive/ubuntu/chromium-dev/+files/vdpau-va-driver_0.7.4-6ubuntu2~ppa1~18.04.1_amd64.deb" && apt-get install --no-install-recommends -y /tmp/vdpau-va-driver.deb && rm -rf /tmp/* && \
     rm -rf /var/lib/apt/lists/*
 
-# Install and configure Vulkan
+# Install and configure Vulkan manually
 RUN if [ "${UBUNTU_RELEASE}" = "18.04" ]; then apt-get update && apt-get install --no-install-recommends -y libvulkan1 mesa-vulkan-drivers vulkan-utils; else apt-get update && apt-get install --no-install-recommends -y libvulkan1 mesa-vulkan-drivers vulkan-tools; fi && \
     rm -rf /var/lib/apt/lists/* && \
     VULKAN_API_VERSION=$(dpkg -s libvulkan1 | grep -oP 'Version: [0-9|\.]+' | grep -oP '[0-9]+(\.[0-9]+)(\.[0-9]+)') && \
@@ -180,7 +185,7 @@ RUN if [ "${UBUNTU_RELEASE}" = "18.04" ]; then apt-get update && apt-get install
     }\n\
 }" > /etc/vulkan/icd.d/nvidia_icd.json
 
-# Install VirtualGL
+# Install VirtualGL and make libraries available for preload
 RUN VIRTUALGL_VERSION=$(curl -fsSL "https://api.github.com/repos/VirtualGL/virtualgl/releases/67016359" | jq -r '.tag_name' | sed 's/[^0-9\.\-]*//g') && \
     curl -fsSL -O https://sourceforge.net/projects/virtualgl/files/virtualgl_${VIRTUALGL_VERSION}_amd64.deb && \
     curl -fsSL -O https://sourceforge.net/projects/virtualgl/files/virtualgl32_${VIRTUALGL_VERSION}_amd64.deb && \
@@ -194,8 +199,8 @@ RUN VIRTUALGL_VERSION=$(curl -fsSL "https://api.github.com/repos/VirtualGL/virtu
     chmod u+s /usr/lib/i386-linux-gnu/libvglfaker.so && \
     chmod u+s /usr/lib/i386-linux-gnu/libdlfaker.so
 
-# Wine, Winetricks, and PlayOnLinux, comment out the below lines to disable
-ARG WINE_BRANCH=devel
+# Wine, Winetricks, Lutris, and PlayOnLinux, this process must be consistent with https://wiki.winehq.org/Ubuntu
+ARG WINE_BRANCH=staging
 RUN if [ "${UBUNTU_RELEASE}" = "18.04" ]; then add-apt-repository ppa:cybermax-dexter/sdl2-backport; fi && \
     mkdir -pm755 /etc/apt/keyrings && curl -fsSL -o /etc/apt/keyrings/winehq-archive.key "https://dl.winehq.org/wine-builds/winehq.key" && \
     curl -fsSL -o "/etc/apt/sources.list.d/winehq-$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2).sources" "https://dl.winehq.org/wine-builds/ubuntu/dists/$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2)/winehq-$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2).sources" && \
@@ -211,14 +216,13 @@ RUN if [ "${UBUNTU_RELEASE}" = "18.04" ]; then add-apt-repository ppa:cybermax-d
     chmod 755 /usr/bin/winetricks && \
     curl -fsSL -o /usr/share/bash-completion/completions/winetricks "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks.bash-completion"
 
-# Install latest selkies-gstreamer (https://github.com/selkies-project/selkies-gstreamer) build, Python application, and web application
+# Install latest selkies-gstreamer (https://github.com/selkies-project/selkies-gstreamer) build, Python application, and web application, should be consistent with selkies-gstreamer docs
 RUN apt-get update && apt-get install --no-install-recommends -y \
         build-essential \
         python3-pip \
         python3-dev \
         python3-gi \
         python3-setuptools \
-        python3-tk \
         python3-wheel \
         tzdata \
         sudo \
@@ -255,7 +259,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     curl -fsSL "https://github.com/selkies-project/selkies-gstreamer/releases/download/v${SELKIES_VERSION}/selkies-gstreamer-web-v${SELKIES_VERSION}.tgz" | tar -zxf - && \
     cd /usr/local/cuda/lib64 && sudo find . -maxdepth 1 -type l -name "*libnvrtc.so.*" -exec sh -c 'ln -sf $(basename {}) libnvrtc.so' \;
 
-# Install latest noVNC web interface for fallback
+# Install latest noVNC web interface and x11vnc for fallback
 RUN apt-get update && apt-get install --no-install-recommends -y \
         autoconf \
         automake \
@@ -288,9 +292,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     ln -s /opt/noVNC/vnc.html /opt/noVNC/index.html && \
     git clone https://github.com/novnc/websockify /opt/noVNC/utils/websockify
 
-# Add custom packages below this comment, or use FROM in a new container and replace entrypoint.sh or supervisord.conf
+# Add custom packages below this comment, or use FROM in a new container and replace entrypoint.sh or supervisord.conf, and set ENTRYPOINT to /usr/bin/supervisord
 
-# Create user with password ${PASSWD}
+# Create user with password ${PASSWD} and assign adequate groups
 RUN apt-get update && apt-get install --no-install-recommends -y \
         sudo && \
     rm -rf /var/lib/apt/lists/* && \
@@ -302,6 +306,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     echo "user:${PASSWD}" | chpasswd && \
     ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
 
+# Copy scripts and configurations used to start the container
 COPY entrypoint.sh /etc/entrypoint.sh
 RUN chmod 755 /etc/entrypoint.sh
 COPY selkies-gstreamer-entrypoint.sh /etc/selkies-gstreamer-entrypoint.sh

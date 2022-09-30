@@ -21,9 +21,6 @@ spec:
         env:
         - name: TZ
           value: "UTC"
-        # Keep to default unless you know what you are doing with VirtualGL, `VGL_DISPLAY` should be set to either `egl[n]`, or `/dev/dri/card[n]` only when the device was passed to the container
-#        - name: VGL_DISPLAY
-#          value: "egl"
         - name: SIZEW
           value: "1920"
         - name: SIZEH
@@ -34,6 +31,9 @@ spec:
           value: "96"
         - name: CDEPTH
           value: "24"
+        # Keep to default unless you know what you are doing with VirtualGL, `VGL_DISPLAY` should be set to either `egl[n]`, or `/dev/dri/card[n]` only when the device was passed to the container
+#        - name: VGL_DISPLAY
+#          value: "egl"
         # Choose either `value:` or `secretKeyRef:` but not both at the same time
         - name: PASSWD
           value: "mypasswd"
