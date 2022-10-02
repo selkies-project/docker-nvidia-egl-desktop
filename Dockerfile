@@ -37,7 +37,7 @@ ENV ENABLE_BASIC_AUTH true
 ARG VIRTUALGL_VERSION=3.0.1
 ARG NOVNC_VERSION=1.3.0
 
-# Install locales to prevent Xorg errors
+# Install locales to prevent Xvfb errors
 RUN apt-get clean && \
     apt-get update && apt-get install --no-install-recommends -y locales && \
     rm -rf /var/lib/apt/lists/* && \
@@ -46,7 +46,7 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Install Xorg, Xfce4 desktop environment, and other utility packages
+# Install Xvfb, Xfce4 desktop environment, and other utility packages
 RUN dpkg --add-architecture i386 && \
     apt-get update && apt-get install --no-install-recommends -y \
         software-properties-common \
