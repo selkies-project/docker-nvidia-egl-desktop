@@ -1,12 +1,12 @@
 # docker-nvidia-egl-desktop
 
-Xfce Desktop container designed for Kubernetes with direct access to the GPU with EGL using VirtualGL and Vulkan for GPUs with WebRTC and HTML5, providing an open source remote cloud graphics or game streaming platform. Does not require `/tmp/.X11-unix` host sockets or host configuration.
+Xfce Desktop container designed for Kubernetes with direct access to the GPU with EGL using [VirtualGL](https://github.com/VirtualGL/virtualgl) and Vulkan for GPUs with WebRTC and HTML5, providing an open source remote cloud graphics or game streaming platform. Does not require `/tmp/.X11-unix` host sockets or host configuration.
 
 Use [docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-desktop) for an Xfce Desktop container with better performance, with fully optimized OpenGL and Vulkan for NVIDIA GPUs by spawning its own fully isolated X Server instead of using `/tmp/.X11-unix` host sockets.
 
 **Read the [Troubleshooting](#troubleshooting) section first before raising an issue. Support is also available with the [Selkies Discord](https://discord.gg/wDNGDeSW5F). Please redirect issues or discussions regarding the [selkies-gstreamer](https://github.com/selkies-project/selkies-gstreamer) WebRTC HTML5 interface to the [project](https://github.com/selkies-project/selkies-gstreamer).**
 
-### Usage
+## Usage
 
 This container is composed fully of vendor-neutral applications and protocols except the NVIDIA base container itself, meaning that **there is nothing stopping you from using this container with GPUs of other vendors including AMD and Intel**. Use the respective vendor's container toolkit/runtime or Kubernetes device plugin and make sure that it provisions `/dev/dri/card[n]` devices, then set the environment variable `WEBRTC_ENCODER` to the value `x264enc`, `vp8enc`, or `vp9enc` if using the selkies-gstreamer WebRTC interface. Install relevant drivers inside the container as well, including `mesa-va-drivers` and `mesa-vulkan-drivers`. However, this is not officially supported and you must solve your own problems. This container also supports running without any GPUs with software fallback (set `WEBRTC_ENCODER` to the value `x264enc`, `vp8enc`, or `vp9enc` if using the selkies-gstreamer WebRTC interface).
 
@@ -23,7 +23,7 @@ The high performance NVENC backend for the selkies-gstreamer WebRTC interface is
 The username is `user` in both the container user account and the web authentication prompt. The environment variable `PASSWD` is the password of the container user account, and `BASIC_AUTH_PASSWORD` is the password for the HTML5 interface authentication prompt. If `ENABLE_BASIC_AUTH` is set to `true` for selkies-gstreamer (not required for noVNC) but `BASIC_AUTH_PASSWORD` is unspecified, the HTML5 interface password will default to `PASSWD`.
 > NOTES: Only one web browser can be connected at a time with the selkies-gstreamer WebRTC interface. If the signaling connection works, but the WebRTC connection fails, read the [Using a TURN Server](#using-a-turn-server) section.
 
-#### Running with Docker
+### Running with Docker
 
 1. Run the container with Docker (or other similar container CLIs like Podman):
 
@@ -41,7 +41,7 @@ Change `WEBRTC_ENCODER` to `x264enc`, `vp8enc`, or `vp9enc` when using the selki
 
 3. (Not Applicable for noVNC) **Read carefully if the selkies-gstreamer WebRTC HTML5 interface does not connect.** Choose whether to use host networking or a TURN server. The selkies-gstreamer WebRTC HTML5 interface will likely just start working if you add `--network host` to the above `docker run` command. However, this may be restricted or be undesired because of security reasons. If so, check if the container starts working after omitting `--network host`. If it does not work, you need a TURN server. Read the [Using a TURN Server](#using-a-turn-server) section and add the environment variables `-e TURN_HOST=`, `-e TURN_PORT=`, and pick one of `-e TURN_SHARED_SECRET=` or both `-e TURN_USERNAME=` and `-e TURN_PASSWORD=` environment variables to the `docker run` command based on your authentication method.
 
-#### Running with Kubernetes
+### Running with Kubernetes
 
 1. Create the Kubernetes Secret with your authentication password:
 
@@ -64,17 +64,17 @@ Change `WEBRTC_ENCODER` to `x264enc`, `vp8enc`, or `vp9enc` when using the selki
 
 4. (Not Applicable for noVNC) **Read carefully if the selkies-gstreamer WebRTC HTML5 interface does not connect.** Choose whether to use host networking or a TURN server. The selkies-gstreamer WebRTC HTML5 interface will likely just start working if you uncomment `hostNetwork: true` in `egl.yml`. However, this may be restricted or be undesired because of security reasons. If so, check if the container starts working after commenting out `hostNetwork: true`. If it does not work, you need a TURN server. Read the [Using a TURN Server](#using-a-turn-server) section and fill in the environment variables `TURN_HOST` and `TURN_PORT`, then pick one of `TURN_SHARED_SECRET` or both `TURN_USERNAME` and `TURN_PASSWORD` environment variables based on your authentication method.
 
-#### Using a TURN server
+## Using a TURN server
 
 Note that this section is only required for the selkies-gstreamer WebRTC HTML5 interface. For an easy fix to when the signaling connection works, but the WebRTC connection fails, add the option `--network host` to your Docker command, or uncomment `hostNetwork: true` in your `egl.yml` file when using Kubernetes (note that your cluster may have not allowed this, resulting in an error). This exposes your container to the host network, which disables network isolation. If this does not fix the connection issue (normally when the host is behind another firewall) or you cannot use this fix for security or technical reasons, read the below text.
 
 In most cases when either of your server or client has a permissive firewall, the default Google STUN server configuration will work without additional configuration. However, when connecting from networks that cannot be traversed with STUN, a TURN server is required.
 
-##### Deploying a TURN server
+### Deploying a TURN server
 
 **Read the instructions from [selkies-gstreamer](https://github.com/selkies-project/selkies-gstreamer#using-a-turn-server) if want to deploy a TURN server or use a public TURN server instance.**
 
-##### Configuring with Docker
+### Configuring with Docker
 
 With Docker (or Podman), use the `-e` option to add the `TURN_HOST`, `TURN_PORT` environment variables. This is the hostname or IP and the port of the TURN server (3478 in most cases).
 
@@ -82,11 +82,11 @@ You may set `TURN_PROTOCOL` to `tcp` if you are only able to open TCP ports for 
 
 You also require to provide either just `TURN_SHARED_SECRET` for time-limited shared secret TURN authentication, or both `TURN_USERNAME` and `TURN_PASSWORD` for legacy long-term TURN authentication, depending on your TURN server configuration. Provide just one of these authentication methods, not both.
 
-##### Configuring with Kubernetes
+### Configuring with Kubernetes
 
 Your TURN server will use only one out of two ways to authenticate the client, so only provide one type of authentication method. The time-limited shared secret TURN authentication requires to only provide the Base64 encoded `TURN_SHARED_SECRET`. The legacy long-term TURN authentication requires to provide both `TURN_USERNAME` and `TURN_PASSWORD` credentials.
 
-###### Time-limited shared secret authentication
+#### Time-limited shared secret authentication
 
 1. Create a secret containing the TURN shared secret:
 
@@ -114,7 +114,7 @@ kubectl create secret generic turn-shared-secret --from-literal=turn-shared-secr
 ```
 > NOTES: It is possible to skip the first step and directly provide the shared secret with `value:`, but this exposes the shared secret in plain text. Set `TURN_PROTOCOL` to `tcp` if you were able to only open TCP ports while creating your own coTURN Deployment/DaemonSet, or if your client network throttles or blocks the UDP protocol.
 
-###### Legacy long-term authentication
+#### Legacy long-term authentication
 
 1. Create a secret containing the TURN password:
 
@@ -144,9 +144,9 @@ kubectl create secret generic turn-password --from-literal=turn-password=MY_TURN
 ```
 > NOTES: It is possible to skip the first step and directly provide the TURN password with `value:`, but this exposes the TURN password in plain text. Set `TURN_PROTOCOL` to `tcp` if you were able to only open TCP ports while creating your own coTURN Deployment/DaemonSet, or if your client network throttles or blocks the UDP protocol.
 
-### Comparison
+## Comparison
 
-[docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-desktop): It's generally recommended to use docker-nvidia-glx-desktop when possible for maximum capabilities and performance. It starts its own X server inside the container without exposure to security risks. However, docker-nvidia-egl-desktop is versatile in various environments and has less processes running, meaning less possible errors. It is also possible to be used in HPC clusters with Apptainer/Singularity available, and sharing a GPU with multiple containers is also possible. Unofficial support for Intel and AMD GPUs is also available.
+[docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-desktop): It's generally recommended to use docker-nvidia-glx-desktop when possible for maximum capabilities and performance. It starts its own X server inside the container without exposure to security risks. However, docker-nvidia-egl-desktop is versatile in various environments and has less processes running, meaning less possible complications in restricted environments. It is also possible to be used in HPC clusters with Apptainer/Singularity available, and sharing a GPU with multiple containers is also possible. Unofficial support for Intel and AMD GPUs is also available.
 
 [Sunshine](https://github.com/LizardByte/Sunshine): This repository is an open-source server for NVIDIA's GameStream protocol, supporting all clients that can install [Moonlight](https://github.com/moonlight-stream). Try it if you don't need username/password authentication and you don't need to use containers. [Games on Whales](https://github.com/games-on-whales/gow) is a container implementation of Sunshine. However, many container ports have to be accessible to the internet, and because of its requirement for the `/dev/uinput` device, unsafe `privileged` access for containers are required. The [selkies-gstreamer](https://github.com/selkies-project/selkies-gstreamer) project, which is integrated to our container, does not require more than one port open from the container (TURN server may be required but can be deployed in a different environment with flexibility), and has almost equal performance while using only a web browser as a client.
 
@@ -168,9 +168,9 @@ kubectl create secret generic turn-password --from-literal=turn-password=MY_TURN
 
 [GamingAnywhere](https://github.com/chunying/gaminganywhere): This is the father of all open-source remote desktop and game streaming protocols. However, it has been created a long time ago and thus reached its end of life.
 
-### Troubleshooting
+## Troubleshooting
 
-#### The container does not work.
+### The container does not work.
 
 Check that the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) is properly configured in the host. After that, check the environment variable `NVIDIA_DRIVER_CAPABILITIES` after starting a shell interface inside the container.
 
@@ -178,21 +178,25 @@ Check that the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/clo
 
 If you checked everything here, scroll down.
 
-#### OpenGL does not work for certain applications.
+### OpenGL does not work for certain applications.
 
-This is likely an issue with [VirtualGL](https://github.com/VirtualGL/virtualgl), which is used to translate GLX commands to EGL commands and use OpenGL without Xorg.
-
-Some applications, including research workloads, show this problem. This **cannot** be solved by raising an issue here or contacting me.
+This is likely an issue with [VirtualGL](https://github.com/VirtualGL/virtualgl), which is used to translate GLX commands to EGL commands and use OpenGL without Xorg. Some applications, including research workloads, show this problem. This **cannot** be solved by raising an issue here or contacting me.
 
 First, check that the application works with [docker-nvidia-glx-desktop](https://github.com/ehfd/docker-nvidia-glx-desktop). If it works, it is indeed a problem associated with [VirtualGL](https://github.com/VirtualGL/virtualgl). If it does not, raise an issue here. Second, use the error messages found with verbose mode and search similar issues for your application. Third, if there are no similar issues, raise the issue to the repository or contact the maintainers. Fourth, if the maintainers request that it should be redirected to [VirtualGL](https://github.com/VirtualGL/virtualgl), raise an issue there after confirming [VirtualGL](https://github.com/VirtualGL/virtualgl) does not have similar issues raised. Note that in this case, you may have to wait for a new [VirtualGL](https://github.com/VirtualGL/virtualgl) release and for this repository to use the new release.
 
-#### Vulkan does not work.
+### Vulkan does not work.
 
 Make sure that the `NVIDIA_DRIVER_CAPABILITIES` environment variable is set to `all`, or includes both `graphics` and `display`. The `display` capability is especially crucial to Vulkan, but the container does start without noticeable issues other than Vulkan without `display`, despite its name. AMD and Intel GPUs are not tested and therefore Vulkan is not guaranteed to work. A Vulkan ICD file is probably required to be added and related drivers like `mesa-vulkan-drivers` should be installed inside the container. People are welcome to share their experiences, however.
 
-#### I want to use a specific GPU for OpenGL rendering when I have multiple GPUs in one container.
+### I want to use a specific GPU for OpenGL rendering when I have multiple GPUs in one container.
 
-Use the `VGL_DISPLAY` environment variable, but only do so after you understand what it implicates with VirtualGL. Valid values are either `egl[n]`, or `/dev/dri/card[n]` only when `--device=/dev/dri` was used for the container (`[n]` is the order of the GPUs, where simply `egl` without the number is the same as `egl0`). Note that `docker --gpus 1` means any single GPU, not the GPU device ID of 1. Use `docker --gpus '"device=1,2"'` to provision GPUs with device IDs 1 and 2 to the container.
+Use the `VGL_DISPLAY` environment variable, but only do so after you understand what it implicates with [VirtualGL](https://github.com/VirtualGL/virtualgl). Valid values are either `egl[n]`, or `/dev/dri/card[n]` only when `--device=/dev/dri` was used for the container (`[n]` is the order of the GPUs, where simply `egl` without the number is the same as `egl0`). Note that `docker --gpus 1` means any single GPU, not the GPU device ID of 1. Use `docker --gpus '"device=1,2"'` to provision GPUs with device IDs 1 and 2 to the container.
+
+### I want to use `systemd`, FUSE mounts, or sandboxed (containerized) application distribution systems like Flatpak, Snapcraft (snap), AppImage, and etc.
+
+**Use the option `--appimage-extract-and-run` or `--appimage-extract` with your AppImage to run them in a container. Alternatively, set `export APPIMAGE_EXTRACT_AND_RUN=1` to your current shell.**
+
+For `systemd`, FUSE mounts, or other sandboxed application distribution systems, do not use them with containers. You can use them if you add unsafe capabilities to your containers, but it will break the isolation of the containers. This is especially bad if you are using Kubernetes. There will likely be an alternative way to install the applications, including [Personal Package Archives](https://launchpad.net/ubuntu/+ppas). For some applications, there will be options to disable sandboxing when running or options to extract files before running.
 
 ---
 This project involved a collaboration effort with members of the [Selkies Project](https://github.com/selkies-project), incorporating the [selkies-gstreamer](https://github.com/selkies-project/selkies-gstreamer) WebRTC remote desktop streaming application. Commercial support for this container is available with [itopia Spaces](https://itopiaspaces.com).
