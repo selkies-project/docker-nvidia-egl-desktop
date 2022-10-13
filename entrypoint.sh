@@ -22,8 +22,6 @@ source /opt/gstreamer/gst-env
 
 # Default display is :0 across the container
 export DISPLAY=":0"
-# Disable VSYNC in OpenGL by default, change this to "1" to enable
-export __GL_SYNC_TO_VBLANK="0"
 # Run Xvfb server with required extensions
 Xvfb "${DISPLAY}" -ac -screen "0" "8192x4096x${CDEPTH}" -dpi "${DPI}" +extension "RANDR" +extension "GLX" +iglx +extension "MIT-SHM" +render -nolisten "tcp" -noreset -shmem &
 
