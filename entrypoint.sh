@@ -14,8 +14,6 @@ sudo ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime && echo "$TZ" | sudo tee /
 export PATH="${PATH}:/usr/local/games:/usr/games:/opt/VirtualGL/bin"
 # Add LibreOffice to library path
 export LD_LIBRARY_PATH="/usr/lib/libreoffice/program:${LD_LIBRARY_PATH}"
-# Enable AppImage execution in a container
-export APPIMAGE_EXTRACT_AND_RUN="1"
 
 # Start DBus without systemd
 sudo /etc/init.d/dbus start
