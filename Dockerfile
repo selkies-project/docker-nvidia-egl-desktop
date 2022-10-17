@@ -120,6 +120,9 @@ RUN dpkg --add-architecture i386 && \
         mesa-utils \
         mesa-utils-extra \
         mesa-va-drivers \
+        mesa-vulkan-drivers \
+        libvulkan-dev \
+        libvulkan-dev:i386 \
         xdg-utils \
         dbus-x11 \
         libdbus-c++-1-0v5 \
@@ -179,7 +182,7 @@ RUN dpkg --add-architecture i386 && \
     rm -rf /var/lib/apt/lists/*
 
 # Install and configure Vulkan manually
-RUN if [ "${UBUNTU_RELEASE}" = "18.04" ]; then apt-get update && apt-get install --no-install-recommends -y libvulkan1 mesa-vulkan-drivers vulkan-utils; else apt-get update && apt-get install --no-install-recommends -y libvulkan1 mesa-vulkan-drivers vulkan-tools; fi && \
+RUN if [ "${UBUNTU_RELEASE}" = "18.04" ]; then apt-get update && apt-get install --no-install-recommends -y vulkan-utils; else apt-get update && apt-get install --no-install-recommends -y vulkan-tools; fi && \
     rm -rf /var/lib/apt/lists/* && \
     VULKAN_API_VERSION=$(dpkg -s libvulkan1 | grep -oP 'Version: [0-9|\.]+' | grep -oP '[0-9]+(\.[0-9]+)(\.[0-9]+)') && \
     mkdir -p /etc/vulkan/icd.d/ && \
