@@ -36,7 +36,7 @@ ENV ENABLE_AUDIO true
 ENV ENABLE_BASIC_AUTH true
 
 # Set versions for components that should be manually checked before upgrading, other component versions are automatically determined by fetching the version online
-ARG VIRTUALGL_VERSION=3.0.1
+ARG VIRTUALGL_VERSION=3.0.2
 ARG NOVNC_VERSION=1.3.0
 
 # Install locales to prevent Xvfb errors
