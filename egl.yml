@@ -17,7 +17,7 @@ spec:
 #      hostNetwork: true
       containers:
       - name: egl
-        image: ghcr.io/ehfd/nvidia-egl-desktop:latest
+        image: ghcr.io/selkies-project/nvidia-egl-desktop:latest
         env:
         - name: TZ
           value: "UTC"
