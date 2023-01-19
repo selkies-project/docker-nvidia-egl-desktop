@@ -41,7 +41,7 @@ ENV ENABLE_AUDIO true
 ENV ENABLE_BASIC_AUTH true
 
 # Set versions for components that should be manually checked before upgrading, other component versions are automatically determined by fetching the version online
-ARG VIRTUALGL_VERSION=3.0.2
+ARG VIRTUALGL_VERSION=3.0.91
 ARG NOVNC_VERSION=1.3.0
 
 # Install locales to prevent X11 errors
@@ -188,8 +188,9 @@ RUN VULKAN_API_VERSION=$(dpkg -s libvulkan1 | grep -oP 'Version: [0-9|\.]+' | gr
 }" > /etc/vulkan/icd.d/nvidia_icd.json
 
 # Install VirtualGL and make libraries available for preload
-RUN curl -fsSL -O "https://sourceforge.net/projects/virtualgl/files/virtualgl_${VIRTUALGL_VERSION}_amd64.deb" && \
-    curl -fsSL -O "https://sourceforge.net/projects/virtualgl/files/virtualgl32_${VIRTUALGL_VERSION}_amd64.deb" && \
+ARG VIRTUALGL_URL=https://s3.amazonaws.com/virtualgl-pr/main/linux
+RUN curl -fsSL -O "${VIRTUALGL_URL}/virtualgl_${VIRTUALGL_VERSION}_amd64.deb" && \
+    curl -fsSL -O "${VIRTUALGL_URL}/virtualgl32_${VIRTUALGL_VERSION}_amd64.deb" && \
     apt-get update && apt-get install -y --no-install-recommends ./virtualgl_${VIRTUALGL_VERSION}_amd64.deb ./virtualgl32_${VIRTUALGL_VERSION}_amd64.deb && \
     rm -f "virtualgl_${VIRTUALGL_VERSION}_amd64.deb" "virtualgl32_${VIRTUALGL_VERSION}_amd64.deb" && \
     rm -rf /var/lib/apt/lists/* && \
