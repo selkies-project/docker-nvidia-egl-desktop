@@ -400,6 +400,8 @@ COPY selkies-gstreamer-entrypoint.sh /etc/selkies-gstreamer-entrypoint.sh
 RUN chmod 755 /etc/selkies-gstreamer-entrypoint.sh
 COPY supervisord.conf /etc/supervisord.conf
 RUN chmod 755 /etc/supervisord.conf
+# disable automatic lock screen for KDE https://github.com/selkies-project/docker-nvidia-egl-desktop/issues/28
+RUN kwriteconfig5 --file ~/.config/kscreenlockerrc --group Daemon --key Autolock false
 
 EXPOSE 8080
 
