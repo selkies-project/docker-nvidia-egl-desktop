@@ -66,8 +66,9 @@ RUN dpkg --add-architecture i386 && \
         build-essential \
         ca-certificates \
         ssl-cert \
-        cups-filters \
+        cups-browsed \
         cups-common \
+        cups-filters \
         cups-pdf \
         curl \
         file \
@@ -93,6 +94,7 @@ RUN dpkg --add-architecture i386 && \
         vim \
         htop \
         ibus-data \
+        fakeroot \
         fonts-dejavu-core \
         fonts-freefont-ttf \
         fonts-hack \
@@ -101,6 +103,8 @@ RUN dpkg --add-architecture i386 && \
         fonts-noto-cjk \
         fonts-noto-cjk-extra \
         fonts-noto-color-emoji \
+        fonts-noto-extra \
+        fonts-noto-ui-extra \
         fonts-noto-hinted \
         fonts-noto-mono \
         fonts-noto-unhinted \
@@ -108,6 +112,7 @@ RUN dpkg --add-architecture i386 && \
         fonts-symbola \
         fonts-ubuntu \
         lame \
+        less \
         libavcodec-extra \
         libpulse0 \
         pulseaudio \
@@ -136,6 +141,7 @@ RUN dpkg --add-architecture i386 && \
         libsm6 \
         libsm6:i386 \
         pkg-config \
+        packagekit-tools \
         mesa-utils \
         mesa-utils-extra \
         va-driver-all \
@@ -147,6 +153,7 @@ RUN dpkg --add-architecture i386 && \
         libva2 \
         libva2:i386 \
         vainfo \
+        vdpau-driver-all \
         vdpauinfo \
         libmfx-tools \
         xserver-xorg-input-all \
@@ -170,7 +177,9 @@ RUN dpkg --add-architecture i386 && \
         libxv1:i386 \
         libxtst6 \
         libxtst6:i386 \
+        xdg-user-dirs \
         xdg-utils \
+        dbus-user-session \
         dbus-x11 \
         libdbus-c++-1-0v5 \
         xkb-data \
@@ -254,6 +263,7 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         haveged \
         hspell \
         im-config \
+        kactivities-bin \
         kaddressbook \
         kate \
         kcalc \
@@ -264,12 +274,10 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         kde-config-gtk-style \
         kde-config-gtk-style-preview \
         kde-config-screenlocker \
-        kde-config-sddm \
         kdeconnect \
         kdegraphics-thumbnailers \
         kdenetwork-filesharing \
         kde-spectacle \
-        kde-style-oxygen-qt5 \
         kdf \
         kdialog \
         kgamma5 \
@@ -299,35 +307,30 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         ksystemlog \
         ktimer \
         kubuntu-settings-desktop \
-        kubuntu-wallpapers \
         kwalletmanager \
         kwin-addons \
         kwin-x11 \
         kwrited \
+        libgdk-pixbuf2.0-bin \
         libpam-kwallet5 \
         muon \
         okular \
         okular-extra-backends \
-        oxygen-sounds \
         plasma-browser-integration \
         plasma-calendar-addons \
         plasma-dataengines-addons \
         plasma-discover \
         plasma-integration \
         plasma-runners-addons \
-        plasma-wallpapers-addons \
         plasma-widgets-addons \
-        plasma-workspace-wallpapers \
         policykit-desktop-privileges \
         polkit-kde-agent-1 \
         powerdevil \
         qapt-deb-installer \
-        qml-module-org-kde-qqc2desktopstyle \
+        qml-module-org-kde-runnermodel \
         qml-module-qtgraphicaleffects \
         qt5-image-formats-plugins \
         qtvirtualkeyboard-plugin \
-        sddm \
-        sddm-theme-breeze \
         software-properties-qt \
         sonnet-plugins \
         sweeper \
