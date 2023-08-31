@@ -270,6 +270,7 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         kcalc \
         kcharselect \
         kdeadmin \
+        kde-config-cddb \
         kde-config-gtk-style \
         kde-config-gtk-style-preview \
         kde-config-screenlocker \
@@ -277,10 +278,10 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         kdegraphics-thumbnailers \
         kdenetwork-filesharing \
         kde-spectacle \
-        kde-style-oxygen-qt5 \
         kdf \
         kdialog \
         kget \
+        kgamma5 \
         kgpg \
         khelpcenter \
         khotkeys \
@@ -304,7 +305,6 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         ksshaskpass \
         ktimer \
         kubuntu-settings-desktop \
-        kubuntu-wallpapers \
         kwalletmanager \
         kwin-addons \
         kwin-x11 \
@@ -314,16 +314,13 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         muon \
         okular \
         okular-extra-backends \
-        oxygen-sounds \
         plasma-browser-integration \
         plasma-calendar-addons \
         plasma-dataengines-addons \
         plasma-discover \
         plasma-integration \
         plasma-runners-addons \
-        plasma-wallpapers-addons \
         plasma-widgets-addons \
-        plasma-workspace-wallpapers \
         policykit-desktop-privileges \
         polkit-kde-agent-1 \
         powerdevil \
