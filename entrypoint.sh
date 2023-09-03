@@ -23,8 +23,6 @@ export PATH="${PATH}:/usr/local/games:/usr/games:/opt/VirtualGL/bin"
 # Add LibreOffice to library path
 export LD_LIBRARY_PATH="/usr/lib/libreoffice/program:${LD_LIBRARY_PATH}"
 
-# Start DBus without systemd
-sudo /etc/init.d/dbus start
 # Configure environment for selkies-gstreamer utilities
 source /opt/gstreamer/gst-env
 
@@ -48,16 +46,13 @@ if [ "${NOVNC_ENABLE,,}" = "true" ]; then
   /opt/noVNC/utils/novnc_proxy --vnc localhost:5900 --listen 8080 --heartbeat 10 &
 fi
 
-# Choose startplasma-x11 or startkde for KDE startup
-if [ -x "$(command -v startplasma-x11)" ]; then export KDE_START="startplasma-x11"; else export KDE_START="startkde"; fi
-
 # Use VirtualGL to run the KDE desktop environment with OpenGL if the GPU is available, otherwise use OpenGL with llvmpipe
 if [ -n "$(nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
   export VGL_DISPLAY="${VGL_DISPLAY:-egl}"
   export VGL_REFRESHRATE="$REFRESH"
-  vglrun +wm $KDE_START &
+  vglrun +wm /usr/bin/dbus-launch /usr/bin/startplasma-x11 &
 else
-  $KDE_START &
+  /usr/bin/dbus-launch /usr/bin/startplasma-x11 &
 fi
 
 # Add custom processes right below this line, or within `supervisord.conf` to perform service management similar to systemd
