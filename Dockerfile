@@ -273,12 +273,10 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         kcalc \
         kcharselect \
         kdeadmin \
-        kde-config-cddb \
         kde-config-gtk-style \
         kde-config-gtk-style-preview \
         kdeconnect \
         kdegraphics-thumbnailers \
-        kdenetwork-filesharing \
         kde-spectacle \
         kdf \
         kdialog \
@@ -297,7 +295,6 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         kwin-addons \
         kwin-x11 \
         libgdk-pixbuf2.0-bin \
-        muon \
         okular \
         okular-extra-backends \
         partitionmanager \
