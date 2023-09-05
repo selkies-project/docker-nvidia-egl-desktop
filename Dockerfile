@@ -67,6 +67,7 @@ RUN dpkg --add-architecture i386 && \
         ca-certificates \
         ssl-cert \
         cups-browsed \
+        cups-bsd \
         cups-common \
         cups-filters \
         cups-pdf \
@@ -93,10 +94,8 @@ RUN dpkg --add-architecture i386 && \
         nano \
         vim \
         htop \
-        ibus \
-        ibus-data \
         fakeroot \
-        fonts-dejavu-core \
+        fonts-dejavu \
         fonts-freefont-ttf \
         fonts-hack \
         fonts-liberation \
@@ -194,8 +193,10 @@ RUN dpkg --add-architecture i386 && \
         x11-apps \
         xauth \
         xbitmaps \
-        xinit \
         xfonts-base \
+        xfonts-scalable \
+        xinit \
+        xsettingsd \
         libxrandr-dev \
         # Install Xvfb, packages above this line should be the same between docker-nvidia-glx-desktop and docker-nvidia-egl-desktop
         xvfb && \
@@ -263,6 +264,8 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         dolphin \
         dolphin-plugins \
         dbus-x11 \
+        fcitx \
+        fcitx-tools \
         filelight \
         frameworkintegration \
         gwenview \
@@ -273,6 +276,7 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         kcalc \
         kcharselect \
         kdeadmin \
+        kde-config-fcitx \
         kde-config-gtk-style \
         kde-config-gtk-style-preview \
         kdeconnect \
@@ -295,10 +299,13 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         kwin-addons \
         kwin-x11 \
         libgdk-pixbuf2.0-bin \
+        libgtk2.0-bin \
+        libgtk-3-bin \
         okular \
         okular-extra-backends \
         partitionmanager \
         plasma-browser-integration \
+        plasma-calendar-addons \
         plasma-dataengines-addons \
         plasma-discover \
         plasma-integration \
@@ -312,7 +319,9 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         qml-module-org-kde-qqc2desktopstyle \
         qml-module-qtgraphicaleffects \
         qml-module-qtquick-xmllistmodel \
+        qt5-gtk-platformtheme \
         qt5-image-formats-plugins \
+        qt5-style-plugins \
         qtspeech5-flite-plugin \
         qtvirtualkeyboard-plugin \
         software-properties-qt \
