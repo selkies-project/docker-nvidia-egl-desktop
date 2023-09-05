@@ -1,6 +1,6 @@
 # docker-nvidia-egl-desktop
 
-KDE Plasma Desktop container designed for Kubernetes with direct access to the GPU with EGL using [VirtualGL](https://github.com/VirtualGL/virtualgl) and Vulkan for GPUs with WebRTC and HTML5, providing an open source remote cloud graphics or game streaming platform. Does not require `/tmp/.X11-unix` host sockets or host configuration.
+KDE Plasma Desktop container designed for Kubernetes with direct access to the GPU with EGL using [VirtualGL](https://github.com/VirtualGL/virtualgl) and Vulkan for GPUs with WebRTC and HTML5, providing an open-source remote cloud graphics or game streaming platform. Does not require `/tmp/.X11-unix` host sockets or host configuration.
 
 Use [docker-nvidia-glx-desktop](https://github.com/selkies-project/docker-nvidia-glx-desktop) for a KDE Plasma Desktop container with better performance, with fully optimized OpenGL and Vulkan for NVIDIA GPUs by spawning its own fully isolated X Server instead of using `/tmp/.X11-unix` host sockets.
 
