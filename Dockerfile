@@ -265,6 +265,7 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         dolphin-plugins \
         dbus-x11 \
         fcitx \
+        fcitx-frontend-qt5 \
         fcitx-module-dbus \
         fcitx-module-kimpanel \
         fcitx-module-lua \
@@ -305,6 +306,13 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         libgdk-pixbuf2.0-bin \
         libgtk2.0-bin \
         libgtk-3-bin \
+        libkf5baloowidgets-bin \
+        libkf5dbusaddons-bin \
+        libkf5iconthemes-bin \
+        libkf5kdelibs4support5-bin \
+        libkf5khtml-bin \
+        libkf5parts-plugins \
+        libqt5multimedia5-plugins \
         okular \
         okular-extra-backends \
         partitionmanager \
