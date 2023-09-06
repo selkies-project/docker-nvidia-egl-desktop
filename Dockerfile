@@ -264,6 +264,7 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         dolphin \
         dolphin-plugins \
         dbus-x11 \
+        enchant-2 \
         fcitx \
         fcitx-frontend-gtk2 \
         fcitx-frontend-gtk3 \
@@ -303,8 +304,12 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         kmouth \
         ksshaskpass \
         ktimer \
+        kwayland-integration \
         kwin-addons \
         kwin-x11 \
+        libdbusmenu-glib4 \
+        libdbusmenu-gtk3-4 \
+        libgail-common \
         libgdk-pixbuf2.0-bin \
         libgtk2.0-bin \
         libgtk-3-bin \
@@ -315,6 +320,8 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         libkf5khtml-bin \
         libkf5parts-plugins \
         libqt5multimedia5-plugins \
+        librsvg2-common \
+        media-player-info \
         okular \
         okular-extra-backends \
         partitionmanager \
@@ -345,6 +352,7 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         ubuntu-drivers-common \
         vlc \
         vlc-l10n \
+        vlc-plugin-access-extra \
         vlc-plugin-notify \
         vlc-plugin-samba \
         vlc-plugin-skins2 \
