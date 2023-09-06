@@ -265,6 +265,8 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         dolphin-plugins \
         dbus-x11 \
         fcitx \
+        fcitx-frontend-gtk2 \
+        fcitx-frontend-gtk3 \
         fcitx-frontend-qt5 \
         fcitx-module-dbus \
         fcitx-module-kimpanel \
