@@ -29,7 +29,7 @@ source /opt/gstreamer/gst-env
 # Default display is :0 across the container
 export DISPLAY=":0"
 # Run Xvfb server with required extensions
-Xvfb "${DISPLAY}" -ac -screen "0" "8192x4096x${CDEPTH}" -dpi "${DPI}" +extension "RANDR" +extension "GLX" +iglx +extension "MIT-SHM" +render -nolisten "tcp" -noreset -shmem &
+/usr/bin/Xvfb "${DISPLAY}" -ac -screen "0" "8192x4096x${CDEPTH}" -dpi "${DPI}" +extension "RANDR" +extension "GLX" +iglx +extension "MIT-SHM" +render -nolisten "tcp" -noreset -shmem &
 
 # Wait for X11 to start
 echo "Waiting for X socket"
@@ -37,12 +37,12 @@ until [ -S "/tmp/.X11-unix/X${DISPLAY/:/}" ]; do sleep 1; done
 echo "X socket is ready"
 
 # Resize the screen to the provided size
-selkies-gstreamer-resize "${SIZEW}x${SIZEH}"
+/usr/local/bin/selkies-gstreamer-resize "${SIZEW}x${SIZEH}"
 
 # Run the x11vnc + noVNC fallback web interface if enabled
 if [ "${NOVNC_ENABLE,,}" = "true" ]; then
   if [ -n "$NOVNC_VIEWPASS" ]; then export NOVNC_VIEWONLY="-viewpasswd ${NOVNC_VIEWPASS}"; else unset NOVNC_VIEWONLY; fi
-  x11vnc -display "${DISPLAY}" -passwd "${BASIC_AUTH_PASSWORD:-$PASSWD}" -shared -forever -repeat -xkb -snapfb -threads -xrandr "resize" -rfbport 5900 ${NOVNC_VIEWONLY} &
+  /usr/local/bin/x11vnc -display "${DISPLAY}" -passwd "${BASIC_AUTH_PASSWORD:-$PASSWD}" -shared -forever -repeat -xkb -snapfb -threads -xrandr "resize" -rfbport 5900 ${NOVNC_VIEWONLY} &
   /opt/noVNC/utils/novnc_proxy --vnc localhost:5900 --listen 8080 --heartbeat 10 &
 fi
 
@@ -50,10 +50,13 @@ fi
 if [ -n "$(nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
   export VGL_DISPLAY="${VGL_DISPLAY:-egl}"
   export VGL_REFRESHRATE="$REFRESH"
-  vglrun +wm /usr/bin/dbus-launch /usr/bin/startplasma-x11 &
+  /usr/bin/vglrun +wm /usr/bin/dbus-launch /usr/bin/startplasma-x11 &
 else
   /usr/bin/dbus-launch /usr/bin/startplasma-x11 &
 fi
+
+# Start Fcitx input method framework
+/usr/bin/fcitx &
 
 # Add custom processes right below this line, or within `supervisord.conf` to perform service management similar to systemd
 
