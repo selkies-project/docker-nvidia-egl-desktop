@@ -18,15 +18,13 @@ echo "user:$PASSWD" | sudo chpasswd
 sudo rm -rf /tmp/.X* ~/.cache
 # Change time zone from environment variable
 sudo ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime && echo "$TZ" | sudo tee /etc/timezone > /dev/null
-# Add game directories for Lutris and VirtualGL directories to path
+# Add Lutris and VirtualGL directories to path
 export PATH="${PATH}:/usr/local/games:/usr/games:/opt/VirtualGL/bin"
 # Add LibreOffice to library path
 export LD_LIBRARY_PATH="/usr/lib/libreoffice/program:${LD_LIBRARY_PATH}"
 
 # Start DBus without systemd
 sudo /etc/init.d/dbus start
-# Configure environment for selkies-gstreamer utilities
-source /opt/gstreamer/gst-env
 
 # Default display is :0 across the container
 export DISPLAY=":0"
@@ -39,7 +37,7 @@ until [ -S "/tmp/.X11-unix/X${DISPLAY/:/}" ]; do sleep 1; done
 echo "X socket is ready"
 
 # Resize the screen to the provided size
-/usr/local/bin/selkies-gstreamer-resize "${SIZEW}x${SIZEH}"
+bash -c "source /opt/gstreamer/gst-env && /usr/local/bin/selkies-gstreamer-resize ${SIZEW}x${SIZEH}"
 
 # Run the x11vnc + noVNC fallback web interface if enabled
 if [ "${NOVNC_ENABLE,,}" = "true" ]; then
@@ -52,9 +50,9 @@ fi
 if [ -n "$(nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
   export VGL_DISPLAY="${VGL_DISPLAY:-egl}"
   export VGL_REFRESHRATE="$REFRESH"
-  /usr/bin/vglrun +wm /usr/bin/startplasma-x11 &
+  /usr/bin/vglrun +wm /usr/bin/dbus-launch /usr/bin/startplasma-x11 &
 else
-  /usr/bin/startplasma-x11 &
+  /usr/bin/dbus-launch /usr/bin/startplasma-x11 &
 fi
 
 # Start Fcitx input method framework
