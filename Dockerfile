@@ -237,6 +237,10 @@ RUN curl -fsSL -O "https://github.com/VirtualGL/virtualgl/releases/download/${VI
 
 # Install KDE and other GUI packages
 ENV XDG_CURRENT_DESKTOP KDE
+ENV XDG_SESSION_DESKTOP KDE
+ENV XDG_SESSION_TYPE x11
+ENV DESKTOP_SESSION plasma
+ENV KDE_FULL_SESSION true
 ENV KWIN_COMPOSE N
 ENV KWIN_X11_NO_SYNC_TO_VBLANK 1
 # Use sudoedit to change protected files instead of using sudo on kate
