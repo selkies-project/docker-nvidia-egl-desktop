@@ -37,7 +37,7 @@ until [ -S "/tmp/.X11-unix/X${DISPLAY/:/}" ]; do sleep 1; done
 echo "X socket is ready"
 
 # Resize the screen to the provided size
-bash -c "source /opt/gstreamer/gst-env && /usr/local/bin/selkies-gstreamer-resize ${SIZEW}x${SIZEH}"
+bash -c ". /opt/gstreamer/gst-env && /usr/local/bin/selkies-gstreamer-resize ${SIZEW}x${SIZEH}"
 
 # Run the x11vnc + noVNC fallback web interface if enabled
 if [ "${NOVNC_ENABLE,,}" = "true" ]; then
