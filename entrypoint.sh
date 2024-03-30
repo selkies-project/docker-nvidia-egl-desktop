@@ -19,7 +19,7 @@ sudo rm -rf /tmp/.X* ~/.cache
 # Change time zone from environment variable
 sudo ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime && echo "$TZ" | sudo tee /etc/timezone > /dev/null
 # Add Lutris and VirtualGL directories to path
-export PATH="${PATH}:/usr/local/games:/usr/games:/opt/VirtualGL/bin"
+export PATH="${PATH}:/usr/local/games:/usr/games"
 # Add LibreOffice to library path
 export LD_LIBRARY_PATH="/usr/lib/libreoffice/program:${LD_LIBRARY_PATH}"
 
@@ -48,9 +48,8 @@ fi
 
 # Use VirtualGL to run the KDE desktop environment with OpenGL if the GPU is available, otherwise use OpenGL with llvmpipe
 if [ -n "$(nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
-  export VGL_DISPLAY="${VGL_DISPLAY:-egl}"
   export VGL_REFRESHRATE="$REFRESH"
-  /usr/bin/vglrun +wm /usr/bin/dbus-launch /usr/bin/startplasma-x11 &
+  /usr/bin/vglrun -d "${VGL_DISPLAY:-egl}" +wm /usr/bin/dbus-launch /usr/bin/startplasma-x11 &
 else
   /usr/bin/dbus-launch /usr/bin/startplasma-x11 &
 fi
