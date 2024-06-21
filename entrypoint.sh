@@ -13,7 +13,7 @@ mkdir -pm700 /tmp/runtime-ubuntu
 chown ubuntu:ubuntu /tmp/runtime-ubuntu
 chmod 700 /tmp/runtime-ubuntu
 # Make user directory owned by the user in case it is not
-chown ubuntu:ubuntu /home/ubuntu || sudo chown ubuntu:ubuntu /home/ubuntu || sudo-root chown ubuntu:ubuntu /home/ubuntu || chown user:user /home/ubuntu/* || sudo chown user:user /home/ubuntu/* || sudo-root chown user:user /home/ubuntu/* || echo 'Failed to change user directory permissions, there may be permission issues'
+chown ubuntu:ubuntu /home/ubuntu || sudo-root chown ubuntu:ubuntu /home/ubuntu || chown user:user /home/ubuntu/* || sudo-root chown user:user /home/ubuntu/* || echo 'Failed to change user directory permissions, there may be permission issues'
 # Change operating system password to environment variable
 echo "ubuntu:$PASSWD" | chpasswd
 # Remove directories to make sure the desktop environment starts
