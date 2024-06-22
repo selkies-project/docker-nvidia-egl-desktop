@@ -61,9 +61,9 @@ fi
 export XDG_SESSION_ID="${DISPLAY#*:}"
 if [ -n "$(nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
   export VGL_REFRESHRATE="${DESKTOP_REFRESH}"
-  /usr/bin/vglrun -d "${VGL_DISPLAY:-egl}" +wm /usr/bin/dbus-launch --exit-with-session /usr/bin/startplasma-x11 &
+  /usr/bin/vglrun -d "${VGL_DISPLAY:-egl}" +wm /usr/bin/startplasma-x11 &
 else
-  /usr/bin/dbus-launch --exit-with-session /usr/bin/startplasma-x11 &
+  /usr/bin/startplasma-x11 &
 fi
 
 # Start Fcitx input method framework
