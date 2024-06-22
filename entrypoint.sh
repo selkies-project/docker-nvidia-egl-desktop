@@ -12,8 +12,8 @@ trap "echo TRAPed signal" HUP INT QUIT TERM
 mkdir -pm700 /tmp/runtime-ubuntu
 chown ubuntu:ubuntu /tmp/runtime-ubuntu
 chmod 700 /tmp/runtime-ubuntu
-# Make user directory owned by the user in case it is not
-chown ubuntu:ubuntu /home/ubuntu || sudo-root chown ubuntu:ubuntu /home/ubuntu || chown user:user /home/ubuntu/* || sudo-root chown user:user /home/ubuntu/* || echo 'Failed to change user directory permissions, there may be permission issues'
+# Make user directory owned by the default ubuntu user
+chown ubuntu:ubuntu /home/ubuntu || sudo-root chown ubuntu:ubuntu /home/ubuntu || chown ubuntu:ubuntu /home/ubuntu/* || sudo-root chown ubuntu:ubuntu /home/ubuntu/* || echo 'Failed to change user directory permissions, there may be permission issues'
 # Change operating system password to environment variable
 echo "ubuntu:$PASSWD" | chpasswd
 # Remove directories to make sure the desktop environment starts
@@ -42,10 +42,10 @@ export PULSE_RUNTIME_PATH="${PULSE_RUNTIME_PATH:-${XDG_RUNTIME_DIR:-/tmp}/pulse}
 export PULSE_SERVER="${PULSE_SERVER:-unix:${PULSE_RUNTIME_PATH:-${XDG_RUNTIME_DIR:-/tmp}/pulse}/native}"
 
 # Run Xvfb server with required extensions
-/usr/bin/Xvfb -screen "${DISPLAY}" "8192x4096x${DESKTOP_CDEPTH}" -dpi "${DESKTOP_DPI}" +extension "COMPOSITE" +extension "DAMAGE" +extension "GLX" +extension "RANDR" +extension "RENDER" +extension "MIT-SHM" +extension "XFIXES" +extension "XTEST" +iglx +render -nolisten "tcp" -noreset -shmem &
+/usr/bin/Xvfb "${DISPLAY}" -screen 0 "8192x4096x${DESKTOP_CDEPTH}" -dpi "${DESKTOP_DPI}" +extension "COMPOSITE" +extension "DAMAGE" +extension "GLX" +extension "RANDR" +extension "RENDER" +extension "MIT-SHM" +extension "XFIXES" +extension "XTEST" +iglx +render -nolisten "tcp" -ac -noreset -shmem &
 
 # Wait for X server to start
-echo 'Waiting for X socket' && until [ -S "/tmp/.X11-unix/X${DISPLAY#*:}" ]; do sleep 0.5; done && echo 'X Server is ready'
+echo 'Waiting for X Socket' && until [ -S "/tmp/.X11-unix/X${DISPLAY#*:}" ]; do sleep 0.5; done && echo 'X Server is ready'
 
 # Resize the screen to the provided size
 /usr/local/bin/selkies-gstreamer-resize "${DESKTOP_SIZEW}x${DESKTOP_SIZEH}"
@@ -58,6 +58,7 @@ if [ "${NOVNC_ENABLE,,}" = "true" ]; then
 fi
 
 # Use VirtualGL to run the KDE desktop environment with OpenGL if the GPU is available, otherwise use OpenGL with llvmpipe
+export XDG_SESSION_ID="${DISPLAY#*:}"
 if [ -n "$(nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
   export VGL_REFRESHRATE="${DESKTOP_REFRESH}"
   /usr/bin/vglrun -d "${VGL_DISPLAY:-egl}" +wm /usr/bin/dbus-launch --exit-with-session /usr/bin/startplasma-x11 &
