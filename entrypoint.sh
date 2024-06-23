@@ -42,13 +42,13 @@ export PULSE_RUNTIME_PATH="${PULSE_RUNTIME_PATH:-${XDG_RUNTIME_DIR:-/tmp}/pulse}
 export PULSE_SERVER="${PULSE_SERVER:-unix:${PULSE_RUNTIME_PATH:-${XDG_RUNTIME_DIR:-/tmp}/pulse}/native}"
 
 # Run Xvfb server with required extensions
-/usr/bin/Xvfb "${DISPLAY}" -screen 0 "8192x4096x${DESKTOP_CDEPTH}" -dpi "${DESKTOP_DPI}" +extension "COMPOSITE" +extension "DAMAGE" +extension "GLX" +extension "RANDR" +extension "RENDER" +extension "MIT-SHM" +extension "XFIXES" +extension "XTEST" +iglx +render -nolisten "tcp" -ac -noreset -shmem &
+/usr/bin/Xvfb "${DISPLAY}" -screen 0 "8192x4096x${DISPLAY_CDEPTH}" -dpi "${DISPLAY_DPI}" +extension "COMPOSITE" +extension "DAMAGE" +extension "GLX" +extension "RANDR" +extension "RENDER" +extension "MIT-SHM" +extension "XFIXES" +extension "XTEST" +iglx +render -nolisten "tcp" -ac -noreset -shmem &
 
 # Wait for X server to start
 echo 'Waiting for X Socket' && until [ -S "/tmp/.X11-unix/X${DISPLAY#*:}" ]; do sleep 0.5; done && echo 'X Server is ready'
 
 # Resize the screen to the provided size
-/usr/local/bin/selkies-gstreamer-resize "${DESKTOP_SIZEW}x${DESKTOP_SIZEH}"
+/usr/local/bin/selkies-gstreamer-resize "${DISPLAY_SIZEW}x${DISPLAY_SIZEH}"
 
 # Run the x11vnc + noVNC fallback web interface if enabled
 if [ "${NOVNC_ENABLE,,}" = "true" ]; then
@@ -60,8 +60,8 @@ fi
 # Use VirtualGL to run the KDE desktop environment with OpenGL if the GPU is available, otherwise use OpenGL with llvmpipe
 export XDG_SESSION_ID="${DISPLAY#*:}"
 export QT_LOGGING_RULES='*.debug=false;qt.qpa.*=false'
-if [ -n "$(nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
-  export VGL_REFRESHRATE="${DESKTOP_REFRESH}"
+if [ -n "$(nvidia-smi --query-gpu=uuid --format=csv,noheader | head -n1)" ]; then
+  export VGL_REFRESHRATE="${DISPLAY_REFRESH}"
   /usr/bin/vglrun -d "${VGL_DISPLAY:-egl}" +wm /usr/bin/startplasma-x11 &
 else
   /usr/bin/startplasma-x11 &

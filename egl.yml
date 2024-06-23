@@ -25,15 +25,15 @@ spec:
         env:
         - name: TZ
           value: "UTC"
-        - name: DESKTOP_SIZEW
+        - name: DISPLAY_SIZEW
           value: "1920"
-        - name: DESKTOP_SIZEH
+        - name: DISPLAY_SIZEH
           value: "1080"
-        - name: DESKTOP_REFRESH
+        - name: DISPLAY_REFRESH
           value: "60"
-        - name: DESKTOP_DPI
+        - name: DISPLAY_DPI
           value: "96"
-        - name: DESKTOP_CDEPTH
+        - name: DISPLAY_CDEPTH
           value: "24"
         # Keep to default unless you know what you are doing with VirtualGL, `VGL_DISPLAY` should be set to either `egl[n]`, or `/dev/dri/card[n]` only when the device was passed to the container
 #        - name: VGL_DISPLAY
