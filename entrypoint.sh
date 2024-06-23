@@ -26,8 +26,6 @@ export PATH="${PATH:+${PATH}:}/usr/local/games:/usr/games"
 export LD_LIBRARY_PATH="/usr/lib/libreoffice/program${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
 # Configure joystick interposer
-export SELKIES_INTERPOSER='/usr/$LIB/selkies_joystick_interposer.so'
-export LD_PRELOAD="${SELKIES_INTERPOSER}${LD_PRELOAD:+:${LD_PRELOAD}}"
 export SDL_JOYSTICK_DEVICE=/dev/input/js0
 mkdir -pm777 /dev/input || sudo-root mkdir -pm777 /dev/input || echo 'Failed to create joystick interposer directory'
 touch /dev/input/js0 /dev/input/js1 /dev/input/js2 /dev/input/js3 || sudo-root touch /dev/input/js0 /dev/input/js1 /dev/input/js2 /dev/input/js3 || echo 'Failed to create joystick interposer devices'
@@ -40,6 +38,44 @@ export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}"
 export PIPEWIRE_RUNTIME_DIR="${PIPEWIRE_RUNTIME_DIR:-${XDG_RUNTIME_DIR:-/tmp}}"
 export PULSE_RUNTIME_PATH="${PULSE_RUNTIME_PATH:-${XDG_RUNTIME_DIR:-/tmp}/pulse}"
 export PULSE_SERVER="${PULSE_SERVER:-unix:${PULSE_RUNTIME_PATH:-${XDG_RUNTIME_DIR:-/tmp}/pulse}/native}"
+
+if [ -z "$(ldconfig -p | grep 'libEGL_nvidia.so.0')" ] || [ -z "$(ldconfig -p | grep 'libGLX_nvidia.so.0')" ]; then
+  # Install NVIDIA userspace driver components including X graphic libraries, keep contents same as docker-nvidia-glx-desktop
+  export NVIDIA_DRIVER_ARCH="$(dpkg --print-architecture | sed -e 's/arm64/aarch64/' -e 's/armhf/32bit-ARM/' -e 's/i.*86/x86/' -e 's/amd64/x86_64/' -e 's/unknown/x86_64/')"
+  if [ -z "${NVIDIA_DRIVER_VERSION}" ]; then
+    # Driver version is provided by the kernel through the container toolkit, prioritize kernel driver version if available
+    if [ -f "/proc/driver/nvidia/version" ]; then
+      export NVIDIA_DRIVER_VERSION="$(head -n1 </proc/driver/nvidia/version | awk '{for(i=1;i<=NF;i++) if ($i ~ /^[0-9]+\.[0-9\.]+/) {print $i; exit}}')"
+    # Use NVML version for compatibility with Windows Subsystem for Linux
+    elif command -v nvidia-smi >/dev/null 2>&1; then
+      export NVIDIA_DRIVER_VERSION="$(nvidia-smi --version | grep 'NVML version' | cut -d: -f2 | tr -d ' ')"
+    else
+      echo "Failed to find NVIDIA GPU driver version. You might not be using the NVIDIA container toolkit. Exiting."
+      exit 1
+    fi
+  fi
+  cd /tmp
+  # If version is different, new installer will overwrite the existing components
+  if [ ! -f "/tmp/NVIDIA-Linux-${NVIDIA_DRIVER_ARCH}-${NVIDIA_DRIVER_VERSION}.run" ]; then
+    # Check multiple sources in order to probe both consumer and datacenter driver versions
+    curl -fsSL -O "https://international.download.nvidia.com/XFree86/Linux-${NVIDIA_DRIVER_ARCH}/${NVIDIA_DRIVER_VERSION}/NVIDIA-Linux-${NVIDIA_DRIVER_ARCH}-${NVIDIA_DRIVER_VERSION}.run" || curl -fsSL -O "https://international.download.nvidia.com/tesla/${NVIDIA_DRIVER_VERSION}/NVIDIA-Linux-${NVIDIA_DRIVER_ARCH}-${NVIDIA_DRIVER_VERSION}.run" || { echo "Failed NVIDIA GPU driver download. Exiting."; exit 1; }
+  fi
+  # Extract installer before installing
+  sh "NVIDIA-Linux-${NVIDIA_DRIVER_ARCH}-${NVIDIA_DRIVER_VERSION}.run" -x
+  cd "NVIDIA-Linux-${NVIDIA_DRIVER_ARCH}-${NVIDIA_DRIVER_VERSION}"
+  # Run NVIDIA driver installation without the kernel modules and host components
+  sudo ./nvidia-installer --silent \
+                    --accept-license \
+                    --no-kernel-module \
+                    --install-compat32-libs \
+                    --no-nouveau-check \
+                    --no-nvidia-modprobe \
+                    --no-systemd \
+                    --no-rpms \
+                    --no-backup \
+                    --no-check-for-alternate-installs
+  rm -rf /tmp/NVIDIA* && cd ~
+fi
 
 # Run Xvfb server with required extensions
 /usr/bin/Xvfb "${DISPLAY}" -screen 0 "8192x4096x${DISPLAY_CDEPTH}" -dpi "${DISPLAY_DPI}" +extension "COMPOSITE" +extension "DAMAGE" +extension "GLX" +extension "RANDR" +extension "RENDER" +extension "MIT-SHM" +extension "XFIXES" +extension "XTEST" +iglx +render -nolisten "tcp" -ac -noreset -shmem &
