@@ -46,9 +46,9 @@ if [ -z "$(ldconfig -p | grep 'libEGL_nvidia.so.0')" ] || [ -z "$(ldconfig -p | 
     # Driver version is provided by the kernel through the container toolkit, prioritize kernel driver version if available
     if [ -f "/proc/driver/nvidia/version" ]; then
       export NVIDIA_DRIVER_VERSION="$(head -n1 </proc/driver/nvidia/version | awk '{for(i=1;i<=NF;i++) if ($i ~ /^[0-9]+\.[0-9\.]+/) {print $i; exit}}')"
-    # Use NVML version for compatibility with Windows Subsystem for Linux
     elif command -v nvidia-smi >/dev/null 2>&1; then
-      export NVIDIA_DRIVER_VERSION="$(nvidia-smi --version | grep 'NVML version' | cut -d: -f2 | tr -d ' ')"
+      # Use NVIDIA-SMI when not available
+      export NVIDIA_DRIVER_VERSION="$(nvidia-smi --version | grep 'DRIVER version' | cut -d: -f2 | tr -d ' ')"
     else
       echo "Failed to find NVIDIA GPU driver version. You might not be using the NVIDIA container toolkit. Exiting."
       exit 1
@@ -93,6 +93,7 @@ if [ "$(echo ${KASMVNC_ENABLE} | tr '[:upper:]' '[:lower:]')" = "true" ]; then
   .command_line.prompt = false |
   .desktop.allow_resize = $(echo ${SELKIES_ENABLE_RESIZE-false} | tr '[:upper:]' '[:lower:]') |
   .network.interface = \"0.0.0.0\" |
+  .network.websocket_port = 8080 |
   .network.ssl.require_ssl = $(echo ${SELKIES_ENABLE_HTTPS-false} | tr '[:upper:]' '[:lower:]') |
   .encoding.max_frame_rate = ${DISPLAY_REFRESH}
   " /etc/kasmvnc/kasmvnc.yaml
@@ -102,7 +103,7 @@ if [ "$(echo ${KASMVNC_ENABLE} | tr '[:upper:]' '[:lower:]')" = "true" ]; then
   (echo "${SELKIES_BASIC_AUTH_PASSWORD:-${PASSWD}}"; echo "${SELKIES_BASIC_AUTH_PASSWORD:-${PASSWD}}";) | kasmvncpasswd -u "${SELKIES_BASIC_AUTH_USER:-${USER}}" -o
   if [ "$(echo ${SELKIES_ENABLE_BASIC_AUTH} | tr '[:upper:]' '[:lower:]')" = "false" ]; then export NO_KASM_AUTH_FLAG="-disableBasicAuth"; fi
   if [ -n "${KASMVNC_VIEWPASS}" ]; then (echo "${KASMVNC_VIEWPASS}"; echo "${KASMVNC_VIEWPASS}";) | kasmvncpasswd -u "view"; fi
-  kasmvncserver "${KASM_DISPLAY}" -websocketPort 8080 -geometry "${DISPLAY_SIZEW}x${DISPLAY_SIZEH}" -depth "${DISPLAY_CDEPTH}" -FrameRate "${DISPLAY_REFRESH}" -noxstartup -AlwaysShared -BlacklistTimeout ${NO_KASM_AUTH_FLAG}
+  kasmvncserver "${KASM_DISPLAY}" -geometry "${DISPLAY_SIZEW}x${DISPLAY_SIZEH}" -depth "${DISPLAY_CDEPTH}" -noxstartup -FrameRate "${DISPLAY_REFRESH}" -websocketPort 8080 -AlwaysShared -BlacklistTimeout 0 ${NO_KASM_AUTH_FLAG}
   until [ -S "/tmp/.X11-unix/X${KASM_DISPLAY#*:}" ]; do sleep 0.5; done;
   kasmxproxy -a "${DISPLAY}" -v "${KASM_DISPLAY}" -f "${DISPLAY_REFRESH}" ${KASM_RESIZE_FLAG} &
 fi
