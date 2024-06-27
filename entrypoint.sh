@@ -93,7 +93,7 @@ echo 'Waiting for X Socket' && until [ -S "/tmp/.X11-unix/X${DISPLAY#*:}" ]; do 
 export XDG_SESSION_ID="${DISPLAY#*:}"
 export QT_LOGGING_RULES='*.debug=false;qt.qpa.*=false'
 if [ -n "$(nvidia-smi --query-gpu=uuid --format=csv,noheader | head -n1)" ] || [ -n "$(ls -A /dev/dri 2>/dev/null)" ]; then
-  export VGL_REFRESHRATE="${DISPLAY_REFRESH}"
+  export VGL_FPS="${DISPLAY_REFRESH}"
   /usr/bin/vglrun -d "${VGL_DISPLAY:-egl}" +wm /usr/bin/startplasma-x11 &
 else
   /usr/bin/startplasma-x11 &
