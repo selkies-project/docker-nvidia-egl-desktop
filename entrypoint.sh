@@ -61,6 +61,7 @@ if [ -z "$(ldconfig -p | grep 'libEGL_nvidia.so.0')" ] || [ -z "$(ldconfig -p | 
   fi
   if [ -f "/tmp/NVIDIA-Linux-${NVIDIA_DRIVER_ARCH}-${NVIDIA_DRIVER_VERSION}.run" ]; then
     # Extract installer before installing
+    rm -rf "NVIDIA-Linux-${NVIDIA_DRIVER_ARCH}-${NVIDIA_DRIVER_VERSION}"
     sh "NVIDIA-Linux-${NVIDIA_DRIVER_ARCH}-${NVIDIA_DRIVER_VERSION}.run" -x
     cd "NVIDIA-Linux-${NVIDIA_DRIVER_ARCH}-${NVIDIA_DRIVER_VERSION}"
     # Run NVIDIA driver installation without the kernel modules and host components
