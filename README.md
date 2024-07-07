@@ -41,6 +41,18 @@ docker run --pull=always --name egl -it -d --gpus 1 --tmpfs /dev/shm:rw -e TZ=UT
 
 > NOTE: The container tags available are `latest` and `24.04` for Ubuntu 24.04, `22.04` for Ubuntu 22.04, and `20.04` for Ubuntu 20.04. [Persistent container tags](https://github.com/selkies-project/docker-nvidia-egl-desktop/pkgs/container/nvidia-egl-desktop) are available in the form `24.04-20210101010101`. Replace all instances of `mypasswd` with your desired password. `SELKIES_BASIC_AUTH_PASSWORD` will default to `PASSWD` if unspecified. The container must NOT be run in privileged mode.
 
+For [Apptainer](https://github.com/apptainer/apptainer)/[Singularity](https://github.com/sylabs/singularity) (requiring NVIDIA drivers):
+
+```bash
+# Customize paths
+export SINGULARITY_SELKIES_OVERLAY=~/my_mounting_point/nvidia-egl-desktop.sif
+export SINGULARITY_SELKIES_SCRATCH_HOME=~/nvidia-egl-desktop
+mkdir -pm755 "${SINGULARITY_SELKIES_SCRATCH_HOME}"
+# Change size of overlay storage
+singularity overlay create --sparse --size 1536 "${SINGULARITY_SELKIES_OVERLAY}"
+singularity instance start --overlay "${SINGULARITY_SELKIES_OVERLAY}" --nv --no-mount cwd --home "${SINGULARITY_SELKIES_SCRATCH_HOME}:/home/ubuntu" --env "TZ=UTC,DISPLAY_SIZEW=1920,DISPLAY_SIZEH=1080,DISPLAY_REFRESH=60,DISPLAY_DPI=96,DISPLAY_CDEPTH=24,PASSWD=mypasswd,SELKIES_ENCODER=nvh264enc,SELKIES_VIDEO_BITRATE=8000,SELKIES_FRAMERATE=60,SELKIES_AUDIO_BITRATE=128000,SELKIES_BASIC_AUTH_PASSWORD=mypasswd" docker://ghcr.io/selkies-project/nvidia-egl-desktop:latest egl
+```
+
 The environment variable `VGL_DISPLAY` can also be passed to the container, but only do so after you understand what it implicates with VirtualGL, valid values being either `egl[n]`, or `/dev/dri/card[n]` only when `--device=/dev/dri:rwm` was used for the container.
 
 Change `SELKIES_ENCODER` to `x264enc`, `vp8enc`, or `vp9enc` when using the Selkies-GStreamer interface if you are using software fallback without allocated GPUs or your GPU does not support `H.264 (AVCHD)` under the `NVENC - Encoding` section in NVIDIA's [Video Encode and Decode GPU Support Matrix](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new).
