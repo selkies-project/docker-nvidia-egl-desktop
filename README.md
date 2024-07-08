@@ -22,9 +22,6 @@ The container requires host NVIDIA GPU driver versions of at least **450.80.02**
 
 The high-performance NVENC backend for the Selkies-GStreamer WebRTC interface is only supported in GPUs listed as supporting `H.264 (AVCHD)` under the `NVENC - Encoding` section of NVIDIA's [Video Encode and Decode GPU Support Matrix](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new). If your GPU is not listed as supporting `H.264 (AVCHD)`, add the [environment variable `SELKIES_ENCODER`](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/component.md#encoders) to values including `x264enc`, `vp8enc`, or `vp9enc` in your container configuration for falling back to software acceleration, which also has a very good performance depending on your CPU.
 
-The default username is `ubuntu` for both the web authentication prompt and the container Linux username. The environment variable `PASSWD` (defaulting to `mypasswd`) is the password for the container Linux user account, and `SELKIES_BASIC_AUTH_PASSWORD` is the password for the HTML5 interface authentication prompt. If `SELKIES_ENABLE_BASIC_AUTH` is set to `true` for Selkies-GStreamer but `SELKIES_BASIC_AUTH_PASSWORD` is unspecified, the HTML5 interface password will default to `PASSWD`.
-> NOTE: Only one web browser can be connected at a time with the Selkies-GStreamer WebRTC interface. If the signaling connection works, but the WebRTC connection fails, read the [WebRTC and Firewall Issues](#webrtc-and-firewall-issues) section.
-
 There are two web interfaces that may be chosen in this container, the first being the default [Selkies-GStreamer](https://github.com/selkies-project/selkies-gstreamer) WebRTC HTML5 web interface (requires a TURN server or host networking for best performance), and the second being the fallback [KasmVNC](https://github.com/kasmtech/KasmVNC) WebSocket HTML5 web interface. While the KasmVNC interface does not support audio forwarding, it can be useful for troubleshooting the Selkies-GStreamer WebRTC interface or using this container in constrained environments.
 
 The KasmVNC interface can be enabled in place of Selkies-GStreamer by setting `KASMVNC_ENABLE` to `true`. `KASMVNC_THREADS` sets the number of threads KasmVNC should use for frame encoding, defaulting to all threads if not set. When using the KasmVNC interface, environment variables `SELKIES_ENABLE_BASIC_AUTH`, `SELKIES_BASIC_AUTH_USER`, `SELKIES_BASIC_AUTH_PASSWORD`, `SELKIES_ENABLE_RESIZE`, `SELKIES_ENABLE_HTTPS`, `SELKIES_HTTPS_CERT`, and `SELKIES_HTTPS_KEY`, used with Selkies-GStreamer, are also inherited. As with the Selkies-GStreamer WebRTC interface, the KasmVNC interface username and password will also be set to the environment variables `SELKIES_BASIC_AUTH_USER` and `SELKIES_BASIC_AUTH_PASSWORD`, also using `ubuntu` and the environment variable `PASSWD` by default if not set.
@@ -37,7 +34,16 @@ The KasmVNC interface can be enabled in place of Selkies-GStreamer by setting `K
 docker run --pull=always --name egl -it -d --gpus 1 --tmpfs /dev/shm:rw -e TZ=UTC -e DISPLAY_SIZEW=1920 -e DISPLAY_SIZEH=1080 -e DISPLAY_REFRESH=60 -e DISPLAY_DPI=96 -e DISPLAY_CDEPTH=24 -e PASSWD=mypasswd -e SELKIES_ENCODER=nvh264enc -e SELKIES_VIDEO_BITRATE=8000 -e SELKIES_FRAMERATE=60 -e SELKIES_AUDIO_BITRATE=128000 -e SELKIES_BASIC_AUTH_PASSWORD=mypasswd -p 8080:8080 ghcr.io/selkies-project/nvidia-egl-desktop:latest
 ```
 
-**It is very likely that you may also need `--network host` in the above command in case the desktop interface is stuck at loading, as well as opening UDP and TCP ports 49152–65535 in your host server network, or enabling Full Cone NAT in your network device. However, this only allows one container per host computer. Read the [WebRTC and Firewall Issues](#webrtc-and-firewall-issues) section for advanced setup.**
+**Alternatively, use Docker Compose by editing the [`docker-compose.yml`](docker-compose.yml) file:**
+
+```bash
+# Start the container from the path containing docker-compose.yml
+docker compose up -d
+# Stop the container
+docker compose down
+```
+
+**If the Selkies-GStreamer WebRTC HTML5 interface does not connect or is extremely slow, read Step 3 and the [WebRTC and Firewall Issues](#webrtc-and-firewall-issues) section very carefully.**
 
 > NOTE: The container tags available are `latest` and `24.04` for Ubuntu 24.04, `22.04` for Ubuntu 22.04, and `20.04` for Ubuntu 20.04. [Persistent container tags](https://github.com/selkies-project/docker-nvidia-egl-desktop/pkgs/container/nvidia-egl-desktop) are available in the form `24.04-20210101010101`. Replace all instances of `mypasswd` with your desired password. `SELKIES_BASIC_AUTH_PASSWORD` will default to `PASSWD` if unspecified. The container must NOT be run in privileged mode.
 
@@ -53,28 +59,54 @@ apptainer overlay create --sparse --size 1536 "${APPTAINER_SELKIES_OVERLAY}"
 apptainer instance run --overlay "${APPTAINER_SELKIES_OVERLAY}" --nv --no-mount cwd --home "${APPTAINER_SELKIES_SCRATCH_HOME}:/home/ubuntu" --env "TZ=UTC,DISPLAY_SIZEW=1920,DISPLAY_SIZEH=1080,DISPLAY_REFRESH=60,DISPLAY_DPI=96,DISPLAY_CDEPTH=24,PASSWD=mypasswd,SELKIES_ENCODER=nvh264enc,SELKIES_VIDEO_BITRATE=8000,SELKIES_FRAMERATE=60,SELKIES_AUDIO_BITRATE=128000,SELKIES_BASIC_AUTH_PASSWORD=mypasswd" docker://ghcr.io/selkies-project/nvidia-egl-desktop:latest egl
 ```
 
-The environment variable `VGL_DISPLAY` can also be passed to the container, but only do so after you understand what it implicates with VirtualGL, valid values being either `egl[n]`, or `/dev/dri/card[n]` only when `--device=/dev/dri:rwm` was used for the container.
-
 Change `SELKIES_ENCODER` to `x264enc`, `vp8enc`, or `vp9enc` when using the Selkies-GStreamer interface if you are using software fallback without allocated GPUs or your GPU does not support `H.264 (AVCHD)` under the `NVENC - Encoding` section in NVIDIA's [Video Encode and Decode GPU Support Matrix](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new).
 
+The environment variable `VGL_DISPLAY` can also be passed to the container, but only do so after you understand what it implicates with VirtualGL, valid values being either `egl[n]`, or `/dev/dri/card[n]` only when `--device=/dev/dri:rwm` was used for the container.
+
 2. Connect to the web server with a browser on port 8080. You may also separately configure a reverse proxy to this port for external connectivity.
-> NOTE: Additional configurations and environment variables for the Selkies-GStreamer WebRTC HTML5 interface are listed in lines that start with `parser.add_argument` within the [Selkies-GStreamer Main Script](https://github.com/selkies-project/selkies-gstreamer/blob/master/src/selkies_gstreamer/__main__.py) or `selkies-gstreamer --help`.
 
-3. (Not Applicable for KasmVNC) **Read carefully if the Selkies-GStreamer WebRTC HTML5 interface does not connect.**
+The default username is `ubuntu` for both the web authentication prompt and the container Linux username. The environment variable `PASSWD` (defaulting to `mypasswd`) is the password for the container Linux user account, and `SELKIES_BASIC_AUTH_PASSWORD` is the password for the HTML5 interface authentication prompt. If `SELKIES_ENABLE_BASIC_AUTH` is set to `true` for Selkies-GStreamer but `SELKIES_BASIC_AUTH_PASSWORD` is unspecified, the HTML5 interface password will default to `PASSWD`.
 
-Choose whether to use host networking or a TURN server. The Selkies-GStreamer WebRTC HTML5 interface will likely just start working if you add `--network host` to the above `docker run` command.
+> NOTE: Only one web browser can be connected at a time with the Selkies-GStreamer WebRTC interface. If the signaling connection works, but the WebRTC connection fails, read Step 3 and the [WebRTC and Firewall Issues](#webrtc-and-firewall-issues) section.
 
-However, this may be restricted or be undesired because of security reasons. If so, check if the container starts working after omitting `--network host`.
+Additional configurations and environment variables for the Selkies-GStreamer WebRTC HTML5 interface are listed in lines that start with `parser.add_argument` within the [Selkies-GStreamer Main Script](https://github.com/selkies-project/selkies-gstreamer/blob/master/src/selkies_gstreamer/__main__.py) or `selkies-gstreamer --help`.
 
-If it does not work, you need a TURN server. Read the [WebRTC and Firewall Issues](#webrtc-and-firewall-issues) section and add the environment variables `-e SELKIES_TURN_HOST=`, `-e SELKIES_TURN_PORT=`, and pick one of `-e SELKIES_TURN_SHARED_SECRET=` or both `-e SELKIES_TURN_USERNAME=` and `-e SELKIES_TURN_PASSWORD=` environment variables to the `docker run` command based on your authentication method.
+3. (Not Applicable for KasmVNC) **Read carefully if the Selkies-GStreamer WebRTC HTML5 interface does not connect or is extremely slow.**
+
+Choose whether to use host networking, an internal [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server), or an external [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server).
+
+A [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server) is required because you are self-hosting WebRTC, unlike commercial services using WebRTC.
+
+- **Internal TURN Server:**
+
+There is an internal [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server) inside the container that may be used when an external [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server) or host networking is not available.
+
+Add environment variables `-e SELKIES_TURN_PROTOCOL=udp -e SELKIES_TURN_PORT=3478 -e TURN_MIN_PORT=65534 -e TURN_MAX_PORT=65535` (change the ports accordingly) with the `docker run` command (or uncomment the relevant [`docker-compose.yml`](docker-compose.yml) sections), where the `SELKIES_TURN_PORT` should not be used by any other host process or container, and the `TURN_MIN_PORT`/`TURN_MAX_PORT` port range has to contain at least two ports also not used by any other host process or container.
+
+Then, open the ports with the `docker run` arguments `-p 8080:8080 -p 3478:3478 -p 3478:3478/udp -p 65534-65535:65534-65535 -p 65534-65535:65534-65535/udp` (or uncomment the relevant [`docker-compose.yml`](docker-compose.yml) sections) in addition to the web server port.
+
+All these ports must be exposed to the internet if you need access over the internet. If you need use TURN within a local network, add `-e SELKIES_TURN_HOST=[YOUR_INTERNAL_IP]` with `YOUR_INTERNAL_IP` to the internal hostname or IP of the local network.
+
+If UDP cannot be used, at the cost of higher latency and lower performance, omit the ports containing `/udp` and use the environment variable `-e SELKIES_TURN_PROTOCOL=tcp`.
+
+- **Host Networking:**
+
+The Selkies-GStreamer WebRTC HTML5 interface will likely just start working if you open UDP and TCP ports 49152–65535 in your host server network and add `--network host` to the above `docker run` command, or `network_mode: 'host'` in `docker-compose.yml`. When deploying multiple containers, you must also pass a new `DISPLAY` environment variable such as `-e DISPLAY=:22`, that is not used with any other X11 server or container in the same host, into the container.
+
+However, host networking may be restricted or not be desired because of security reasons. If not available, check if the container starts working after omitting `--network host`.
+
+- **External TURN Server:**
+
+If having no TURN server does not work, you need an external [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server). Read the [WebRTC and Firewall Issues](#webrtc-and-firewall-issues) section and add the environment variables `-e SELKIES_TURN_HOST=`, `-e SELKIES_TURN_PORT=`, and pick one of `-e SELKIES_TURN_SHARED_SECRET=` or both `-e SELKIES_TURN_USERNAME=` and `-e SELKIES_TURN_PASSWORD=` environment variables to the `docker run` command based on your authentication method.
 
 ### Running with Kubernetes
 
-1. Create the Kubernetes Secret with your authentication password:
+1. Create the Kubernetes `Secret` with your authentication password (change keys and values as adequate):
 
 ```bash
 kubectl create secret generic my-pass --from-literal=my-pass=YOUR_PASSWORD
 ```
+
 > NOTE: Replace `YOUR_PASSWORD` with your desired password, and change the name `my-pass` to your preferred name of the Kubernetes secret with the `egl.yml` file changed accordingly as well. It is possible to skip the first step and directly provide the password with `value:` in `egl.yml`, but this exposes the password in plain text.
 
 2. Create the pod after editing the `egl.yml` file to your needs, explanations are available in the file:
@@ -82,26 +114,66 @@ kubectl create secret generic my-pass --from-literal=my-pass=YOUR_PASSWORD
 ```bash
 kubectl create -f egl.yml
 ```
-> NOTE: The container tags available are `latest` and `22.04` for Ubuntu 22.04, and `20.04` for Ubuntu 20.04. [Persistent container tags](https://github.com/selkies-project/docker-nvidia-egl-desktop/pkgs/container/nvidia-egl-desktop) are available in the form `22.04-20210101010101`. `SELKIES_BASIC_AUTH_PASSWORD` will default to `PASSWD` if unspecified.
+
+**If the Selkies-GStreamer WebRTC HTML5 interface does not connect or is extremely slow, read Step 4 and the [WebRTC and Firewall Issues](#webrtc-and-firewall-issues) section very carefully.**
+
+> NOTE: The container tags available are `latest` and `24.04` for Ubuntu 24.04, `22.04` for Ubuntu 22.04, and `20.04` for Ubuntu 20.04. [Persistent container tags](https://github.com/selkies-project/docker-nvidia-egl-desktop/pkgs/container/nvidia-egl-desktop) are available in the form `24.04-20210101010101`. `SELKIES_BASIC_AUTH_PASSWORD` will default to `PASSWD` if unspecified. The container must NOT be run in privileged mode.
 
 Change `SELKIES_ENCODER` to `x264enc`, `vp8enc`, or `vp9enc` when using the Selkies-GStreamer interface if you are using software fallback without allocated GPUs or your GPU does not support `H.264 (AVCHD)` under the `NVENC - Encoding` section in NVIDIA's [Video Encode and Decode GPU Support Matrix](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new).
 
 3. Connect to the web server spawned at port 8080. You may configure the ingress endpoint or reverse proxy that your Kubernetes cluster provides to this port for external connectivity.
-> NOTE: Additional configurations and environment variables for the Selkies-GStreamer WebRTC HTML5 interface are listed in lines that start with `parser.add_argument` within the [Selkies-GStreamer main script](https://github.com/selkies-project/selkies-gstreamer/blob/master/src/selkies_gstreamer/__main__.py).
 
-4. (Not Applicable for KasmVNC) **Read carefully if the Selkies-GStreamer WebRTC HTML5 interface does not connect.** Choose whether to use host networking or a TURN server. The Selkies-GStreamer WebRTC HTML5 interface will likely just start working if you uncomment `hostNetwork: true` in `egl.yml`. However, this may be restricted or be undesired because of security reasons. If so, check if the container starts working after commenting out `hostNetwork: true`. If it does not work, you need a TURN server. Read the [Using a TURN Server](#using-a-turn-server) section and fill in the environment variables `SELKIES_TURN_HOST` and `SELKIES_TURN_PORT`, then pick one of `SELKIES_TURN_SHARED_SECRET` or both `SELKIES_TURN_USERNAME` and `SELKIES_TURN_PASSWORD` environment variables based on your authentication method.
+The default username is `ubuntu` for both the web authentication prompt and the container Linux username. The environment variable `PASSWD` (defaulting to `mypasswd`) is the password for the container Linux user account, and `SELKIES_BASIC_AUTH_PASSWORD` is the password for the HTML5 interface authentication prompt. If `SELKIES_ENABLE_BASIC_AUTH` is set to `true` for Selkies-GStreamer but `SELKIES_BASIC_AUTH_PASSWORD` is unspecified, the HTML5 interface password will default to `PASSWD`.
 
-## Using a TURN server
+> NOTE: Only one web browser can be connected at a time with the Selkies-GStreamer WebRTC interface. If the signaling connection works, but the WebRTC connection fails, read Step 4 and the [WebRTC and Firewall Issues](#webrtc-and-firewall-issues) section.
 
-Note that this section is only required for the Selkies-GStreamer WebRTC HTML5 interface. For an easy fix to when the signaling connection works, but the WebRTC connection fails, add the option `--network host` to your Docker command, or uncomment `hostNetwork: true` in your `egl.yml` file when using Kubernetes (note that your cluster may have not allowed this, resulting in an error). This exposes your container to the host network, which disables network isolation. If this does not fix the connection issue (normally when the host is behind another firewall) or you cannot use this fix for security or technical reasons, read the below text.
+Additional configurations and environment variables for the Selkies-GStreamer WebRTC HTML5 interface are listed in lines that start with `parser.add_argument` within the [Selkies-GStreamer Main Script](https://github.com/selkies-project/selkies-gstreamer/blob/master/src/selkies_gstreamer/__main__.py) or `selkies-gstreamer --help`.
+
+4. (Not Applicable for KasmVNC) **Read carefully if the Selkies-GStreamer WebRTC HTML5 interface does not connect or is extremely slow.**
+
+Choose whether to use host networking, an internal [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server), or an external [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server).
+
+A [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server) is required because you are self-hosting WebRTC, unlike commercial services using WebRTC.
+
+- **Internal TURN Server:**
+
+There is an internal [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server) inside the container that may be used when an external [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server) or host networking is not available.
+
+Uncomment the relevant environment variables `SELKIES_TURN_PROTOCOL=udp`, `SELKIES_TURN_PORT=3478`, `TURN_MIN_PORT=65534`, `TURN_MAX_PORT=65535` (change the ports accordingly) within `egl.yml` (within `name:` and `value:`), where the `SELKIES_TURN_PORT` should not be used by any other host process or container, and the `TURN_MIN_PORT`/`TURN_MAX_PORT` port range has to contain at least two ports also not used by any other host process or container. Then, open all of these ports in the Kubernetes configuration `ports:` section in addition to the web server port.
+
+All these ports must be exposed to the internet if you need access over the internet. If you need use TURN within a local network, add the environment variable `SELKIES_TURN_HOST=[YOUR_INTERNAL_IP]` (within `name:` and `value:`) with `YOUR_INTERNAL_IP` to the internal hostname or IP of the local network.
+
+If UDP cannot be used, at the cost of higher latency and lower performance, omit the ports containing `/udp` and use the environment variable `SELKIES_TURN_PROTOCOL=tcp` (within `name:` and `value:`).
+
+- **Host Networking:**
+
+Otherwise, the Selkies-GStreamer WebRTC HTML5 interface will likely just start working if you open UDP and TCP ports 49152–65535 in your host server network and uncomment `hostNetwork: true` in `egl.yml`. When deploying multiple containers with `hostNetwork: true`, you must also pass a new `DISPLAY` environment variable such as the value `:22`, that is not used with any other X11 server or container in the same host, into the container.
+
+However, host networking may be restricted or not be desired because of security reasons. If not available, check if the container starts working after commenting out `hostNetwork: true`.
+
+- **External TURN Server:**
+
+If having no TURN server does not work, you need an external [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server). Read the [WebRTC and Firewall Issues](#webrtc-and-firewall-issues) section and fill in the environment variables `SELKIES_TURN_HOST` and `SELKIES_TURN_PORT`, then pick one of `SELKIES_TURN_SHARED_SECRET` or both `SELKIES_TURN_USERNAME` and `SELKIES_TURN_PASSWORD` environment variables, based on your authentication method.
+
+## WebRTC and Firewall Issues
+
+Note that this section is only required for the Selkies-GStreamer WebRTC HTML5 interface.
+
+For an easy fix to when the signaling connection works, but the WebRTC connection fails, **open UDP and TCP ports 49152–65535 in your host server network** (or use Full Cone NAT in your network router/infrastructure settings), then add the option `--network host` to your Docker command (or `network_mode: 'host'` in `docker-compose.yml`), or uncomment `hostNetwork: true` in your `egl.yml` file when using Kubernetes (note that your cluster may have not allowed this, resulting in an error). This exposes your container to the host network, which disables network isolation.
+
+When deploying multiple containers with host networking, you must also pass a new `DISPLAY` environment variable such as `-e DISPLAY=:22`, that is not used with any other X11 server or container in the same host, into the container.
+
+If this does not fix the connection issue (normally when the host is behind another additional firewall) or you cannot use this fix for security or technical reasons, read the below text to set up an external [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server).
 
 In most cases when either of your server or client has a permissive firewall, the default Google STUN server configuration will work without additional configuration. However, when connecting from networks that cannot be traversed with STUN, a TURN server is required.
 
 ### Deploying a TURN server
 
-**Read the instructions from [Selkies-GStreamer](https://github.com/selkies-project/selkies-gstreamer#using-a-turn-server) if want to deploy a TURN server or use a public TURN server instance.**
+**Read the instructions from [Selkies-GStreamer](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server) if want to deploy an external TURN server or use a public TURN server instance. Read the last steps of each Docker/Kubernetes instruction to use an internal TURN server instead.**
 
 ### Configuring with Docker
+
+More information is available in the [Selkies-GStreamer](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md) documentation.
 
 With Docker (or Podman), use the `-e` option to add the `SELKIES_TURN_HOST`, `SELKIES_TURN_PORT` environment variables. This is the hostname or IP and the port of the TURN server (3478 in most cases).
 
@@ -109,9 +181,28 @@ You may set `SELKIES_TURN_PROTOCOL` to `tcp` if you are only able to open TCP po
 
 You also require to provide either just `SELKIES_TURN_SHARED_SECRET` for time-limited shared secret TURN authentication, or both `SELKIES_TURN_USERNAME` and `SELKIES_TURN_PASSWORD` for legacy long-term TURN authentication, depending on your TURN server configuration. Provide just one of these authentication methods, not both.
 
+If there is a [TURN REST API](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/component.md#turn-rest) server, provide the environment variable `SELKIES_TURN_REST_URI` to the TURN REST URI within this infrastructure. If there is a shared TURN server within an infrastructure, consider reading the [TURN REST API](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/component.md#turn-rest) documentation or provide the link to your infrastructure administrator to deploy a TURN REST API server.
+
 ### Configuring with Kubernetes
 
-Your TURN server will use only one out of two ways to authenticate the client, so only provide one type of authentication method. The time-limited shared secret TURN authentication requires to only provide the Base64 encoded `SELKIES_TURN_SHARED_SECRET`. The legacy long-term TURN authentication requires to provide both `SELKIES_TURN_USERNAME` and `SELKIES_TURN_PASSWORD` credentials.
+More information is available in the [Selkies-GStreamer](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md) documentation.
+
+Your TURN server will use only one out of three ways to authenticate the client, so only provide one type of authentication method. The time-limited shared secret TURN authentication only requires the Base64 encoded `SELKIES_TURN_SHARED_SECRET`. The legacy long-term TURN authentication requires both `SELKIES_TURN_USERNAME` and `SELKIES_TURN_PASSWORD` credentials. The [TURN REST API](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/component.md#turn-rest) method only requires the `SELKIES_TURN_REST_URI` URI.
+
+#### TURN REST API
+
+If there is a shared TURN server within an infrastructure, consider reading the [TURN REST API](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/component.md#turn-rest) documentation or provide the link to your infrastructure administrator to deploy a TURN REST API server.
+
+Then, uncomment the lines in the `egl.yml` file related to TURN server usage, updating the `SELKIES_TURN_REST_URI` environment variable as needed:
+
+```yaml
+- name: SELKIES_TURN_REST_URI
+  value: "https://turn-rest.myinfrastructure.io:8443/myturnrest"
+- name: SELKIES_TURN_PROTOCOL
+  value: "udp"
+- name: SELKIES_TURN_TLS
+  value: "false"
+```
 
 #### Time-limited shared secret authentication
 
@@ -120,9 +211,10 @@ Your TURN server will use only one out of two ways to authenticate the client, s
 ```bash
 kubectl create secret generic turn-shared-secret --from-literal=turn-shared-secret=MY_SELKIES_TURN_SHARED_SECRET
 ```
+
 > NOTE: Replace `MY_SELKIES_TURN_SHARED_SECRET` with the shared secret of the TURN server, then changing the name `turn-shared-secret` to your preferred name of the Kubernetes secret, with the `egl.yml` file also being changed accordingly.
 
-2. Uncomment the lines in the `egl.yml` file related to TURN server usage, updating the `SELKIES_TURN_HOST` and `SELKIES_TURN_PORT` environment variable as needed:
+2. Uncomment the lines in the `egl.yml` file related to TURN server usage, updating the `SELKIES_TURN_HOST` and `SELKIES_TURN_PORT` environment variables as needed:
 
 ```yaml
 - name: SELKIES_TURN_HOST
@@ -139,7 +231,8 @@ kubectl create secret generic turn-shared-secret --from-literal=turn-shared-secr
 - name: SELKIES_TURN_TLS
   value: "false"
 ```
-> NOTE: It is possible to skip the first step and directly provide the shared secret with `value:`, but this exposes the shared secret in plain text. Set `SELKIES_TURN_PROTOCOL` to `tcp` if you were able to only open TCP ports while creating your own coTURN Deployment/DaemonSet, or if your client network throttles or blocks the UDP protocol.
+
+> NOTE: It is possible to skip the first step and directly provide the shared secret with `value:`, but this exposes the shared secret in plain text. Set `SELKIES_TURN_PROTOCOL` to `tcp` if you were able to only open TCP ports while creating your own coTURN Deployment/DaemonSet, or if your client network throttles or blocks the UDP protocol at the cost of higher latency and lower performance.
 
 #### Legacy long-term authentication
 
@@ -148,9 +241,10 @@ kubectl create secret generic turn-shared-secret --from-literal=turn-shared-secr
 ```bash
 kubectl create secret generic turn-password --from-literal=turn-password=MY_SELKIES_TURN_PASSWORD
 ```
+
 > NOTE: Replace `MY_SELKIES_TURN_PASSWORD` with the password of the TURN server, then changing the name `turn-password` to your preferred name of the Kubernetes secret, with the `egl.yml` file also being changed accordingly.
 
-2. Uncomment the lines in the `egl.yml` file related to TURN server usage, updating the `SELKIES_TURN_HOST`, `SELKIES_TURN_PORT`, and `SELKIES_TURN_USERNAME` environment variable as needed:
+2. Uncomment the lines in the `egl.yml` file related to TURN server usage, updating the `SELKIES_TURN_HOST`, `SELKIES_TURN_PORT`, and `SELKIES_TURN_USERNAME` environment variables as needed:
 
 ```yaml
 - name: SELKIES_TURN_HOST
@@ -169,21 +263,30 @@ kubectl create secret generic turn-password --from-literal=turn-password=MY_SELK
 - name: SELKIES_TURN_TLS
   value: "false"
 ```
-> NOTE: It is possible to skip the first step and directly provide the TURN password with `value:`, but this exposes the TURN password in plain text. Set `SELKIES_TURN_PROTOCOL` to `tcp` if you were able to only open TCP ports while creating your own coTURN Deployment/DaemonSet, or if your client network throttles or blocks the UDP protocol.
+
+> NOTE: It is possible to skip the first step and directly provide the TURN password with `value:`, but this exposes the TURN password in plain text. Set `SELKIES_TURN_PROTOCOL` to `tcp` if you were able to only open TCP ports while creating your own coTURN Deployment/DaemonSet, or if your client network throttles or blocks the UDP protocol at the cost of higher latency and lower performance.
 
 ## Troubleshooting
 
-### I have an issue related to the WebRTC HTML5 interface.
+### I have an issue related to the Selkies-GStreamer WebRTC HTML5 interface.
 
-**[Link]([https://github.com/selkies-project/selkies-gstreamer#troubleshooting)**
+**[Link](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/README.md)**
 
 ### I want to use the keyboard layout of my own language.
 
+<details>
+  <summary>Open Answer</summary>
+
 Run `Input Method: Configure Input Method` from the start menu, uncheck `Only Show Current Language`, search and add from available input methods (Hangul, Mozc, Pinyin, and others) by moving to the right, then use `Ctrl + Space` to switch between the input methods. Raise an issue if you need more layouts.
+
+</details>
 
 ### The container does not work.
 
-Check that the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) is properly configured in the host. Next, check whether your host NVIDIA GPU driver is the `nvidia-headless` variant, which lacks the required display and graphics capabilities for this container.
+<details>
+  <summary>Open Answer</summary>
+
+Check that the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) is properly configured in the host. Next, check that your host NVIDIA GPU driver is not the `nvidia-headless` variant, which lacks the required display and graphics capabilities for this container.
 
 After that, check the environment variable `NVIDIA_DRIVER_CAPABILITIES` after starting a shell interface inside the container. `NVIDIA_DRIVER_CAPABILITIES` should be set to `all`, or include a comma-separated list of `compute` (requirement for CUDA and OpenCL, or for the [Selkies-GStreamer](https://github.com/selkies-project/selkies-gstreamer) WebRTC remote desktop interface), `utility` (requirement for `nvidia-smi` and NVML), `graphics` (requirement for OpenGL and part of the requirement for Vulkan), `video` (required for encoding or decoding videos using NVIDIA GPUs, or for the [Selkies-GStreamer](https://github.com/selkies-project/selkies-gstreamer) WebRTC remote desktop interface), `display` (the other requirement for Vulkan), and optionally `compat32` if you use Wine or 32-bit graphics applications.
 
@@ -205,30 +308,47 @@ spec:
 
 If you checked everything here, scroll down.
 
+</details>
+
 ### I want to use `systemd`, `polkit`, FUSE mounts, or sandboxed (containerized) application distribution systems like Flatpak, Snapcraft (snap), AppImage, and etc.
 
-**Use the option `--appimage-extract-and-run` or `--appimage-extract` with your AppImage to run them in a container. Alternatively, set `export APPIMAGE_EXTRACT_AND_RUN=1` to your current shell. For controlling PulseAudio, use `pactl` instead of `pacmd` as the latter corrupts the audio system within the container. Use `sudoedit` to edit protected files in the desktop instead of using `sudo` followed by the name of the editor.**
-
 <details>
-  <summary>Open Long Answer</summary>
+  <summary>Open Answer</summary>
 
-For `systemd`, `polkit`, FUSE mounts, or sandboxed application distribution systems, do not use them with containers. You can use them if you add unsafe capabilities to your containers, but it will break the isolation of the containers. This is especially bad if you are using Kubernetes. For controlling PulseAudio, use `pactl` instead of `pacmd` as the latter corrupts the audio system within the container. Because `polkit` does not work, use `sudoedit` to edit protected files with the GUI instead of using `sudo` followed by the name of the editor. There will likely be an alternative way to install the applications, including [Personal Package Archives](https://launchpad.net/ubuntu/+ppas). For some applications, there will be options to disable sandboxing when running or options to extract files before running.
+**Use the option `--appimage-extract-and-run` or `--appimage-extract` with your AppImage to run them in a container. Alternatively, set `export APPIMAGE_EXTRACT_AND_RUN=1` to your current shell.**
+
+Do not use `systemd`, `polkit`, FUSE mounts, or sandboxed application distribution systems with containers. You can use them if you add unsafe capabilities to your containers, but it will break the isolation of the containers. This is especially bad if you are using Kubernetes. There will likely be an alternative way to install the applications instead of Snapcraft (snap) or Flatpak, including [Personal Package Archives](https://launchpad.net/ubuntu/+ppas). For some applications, especially those using the [Electron](https://www.electronjs.org/) framework, there will be options to disable sandboxing when running or options to extract files before running.
 
 </details>
 
 ### OpenGL does not work for certain applications.
 
+<details>
+  <summary>Open Answer</summary>
+
 This is likely an issue with [VirtualGL](https://github.com/VirtualGL/virtualgl), which is used to translate GLX commands to EGL commands and use OpenGL without Xorg. Some applications, including research workloads, show this problem. This **cannot** be solved by raising an issue here or contacting me.
 
 First, check that the application works with [docker-nvidia-glx-desktop](https://github.com/selkies-project/docker-nvidia-glx-desktop) in the same host environment. If it works, it is indeed a problem associated with [VirtualGL](https://github.com/VirtualGL/virtualgl). If it does not, raise an issue here. Second, use the error messages found with verbose mode and search similar issues for your application. Third, if there are no similar issues, raise the issue to the repository or contact the maintainers. Fourth, if the maintainers request that it should be redirected to [VirtualGL](https://github.com/VirtualGL/virtualgl), raise an issue there after confirming [VirtualGL](https://github.com/VirtualGL/virtualgl) does not have similar issues raised. Note that in this case, you may have to wait for a new [VirtualGL](https://github.com/VirtualGL/virtualgl) release and for this repository to use the new release.
 
+</details>
+
 ### Vulkan does not work.
 
-Make sure that the `NVIDIA_DRIVER_CAPABILITIES` environment variable is set to `all`, or includes both `graphics` and `display`. The `display` capability is especially crucial to Vulkan, but the container does start without noticeable issues other than Vulkan without `display`, despite its name. AMD and Intel GPUs are not tested and therefore Vulkan is not guaranteed to work. A Vulkan ICD file is probably required to be added and related drivers like `mesa-vulkan-drivers` should be installed inside the container. People are welcome to share their experiences, however.
+<details>
+  <summary>Open Answer</summary>
+
+Make sure that the `NVIDIA_DRIVER_CAPABILITIES` environment variable is set to `all`, or includes both `graphics` and `display`. The `display` capability is especially crucial to Vulkan, but the container does start without noticeable issues other than Vulkan without `display`, despite its name. AMD and Intel GPUs are not tested and therefore Vulkan is not guaranteed to work. People are welcome to share their experiences, however.
+
+</details>
 
 ### I want to use a specific GPU for OpenGL rendering when I have multiple GPUs in one container.
 
+<details>
+  <summary>Open Answer</summary>
+
 Use the `VGL_DISPLAY` environment variable, but only do so after you understand what it implicates with [VirtualGL](https://github.com/VirtualGL/virtualgl). Valid values are either `egl[n]`, or `/dev/dri/card[n]` only when `--device=/dev/dri` was used for the container (`[n]` is the order of the GPUs, where simply `egl` without the number is the same as `egl0`). Note that `docker --gpus 1` means any single GPU, not the GPU device ID of 1. Use `docker --gpus '"device=1,2"'` to provision GPUs with device IDs 1 and 2 to the container.
 
+</details>
+
 ---
-This work was supported in part by National Science Foundation (NSF) awards CNS-1730158, ACI-1540112, ACI-1541349, OAC-1826967, OAC-2112167, CNS-2100237, CNS-2120019, the University of California Office of the President, and the University of California San Diego's California Institute for Telecommunications and Information Technology/Qualcomm Institute. Thanks to CENIC for the 100Gbps networks.
+This project has been developed and is supported in part by the National Research Platform (NRP) and the Cognitive Hardware and Software Ecosystem Community Infrastructure (CHASE-CI) at the University of California, San Diego, by funding from the National Science Foundation (NSF), with awards #1730158, #1540112, #1541349, #1826967, #2138811, #2112167, #2100237, and #2120019, as well as additional funding from community partners, infrastructure utilization from the Open Science Grid Consortium, supported by the National Science Foundation (NSF) awards #1836650 and #2030508, and infrastructure utilization from the Chameleon testbed, supported by the National Science Foundation (NSF) awards #1419152, #1743354, and #2027170. This project has also been funded by the Seok-San Yonsei Medical Scientist Training Program (MSTP) Song Yong-Sang Scholarship, College of Medicine, Yonsei University, the MD-PhD/Medical Scientist Training Program (MSTP) through the Korea Health Industry Development Institute (KHIDI), funded by the Ministry of Health & Welfare, Republic of Korea, and the Student Research Bursary of Song-dang Institute for Cancer Research, College of Medicine, Yonsei University.
