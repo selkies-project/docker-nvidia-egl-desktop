@@ -31,7 +31,7 @@ The KasmVNC interface can be enabled in place of Selkies-GStreamer by setting `K
 **1. Run the container with Docker, Podman, or other NVIDIA-supported container runtimes ([NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) required):**
 
 ```bash
-docker run --pull=always --name egl -it -d --gpus 1 --tmpfs /dev/shm:rw -e TZ=UTC -e DISPLAY_SIZEW=1920 -e DISPLAY_SIZEH=1080 -e DISPLAY_REFRESH=60 -e DISPLAY_DPI=96 -e DISPLAY_CDEPTH=24 -e PASSWD=mypasswd -e SELKIES_ENCODER=nvh264enc -e SELKIES_VIDEO_BITRATE=8000 -e SELKIES_FRAMERATE=60 -e SELKIES_AUDIO_BITRATE=128000 -e SELKIES_BASIC_AUTH_PASSWORD=mypasswd -p 8080:8080 ghcr.io/selkies-project/nvidia-egl-desktop:latest
+docker run --name egl -it -d --gpus 1 --tmpfs /dev/shm:rw -e TZ=UTC -e DISPLAY_SIZEW=1920 -e DISPLAY_SIZEH=1080 -e DISPLAY_REFRESH=60 -e DISPLAY_DPI=96 -e DISPLAY_CDEPTH=24 -e PASSWD=mypasswd -e SELKIES_ENCODER=nvh264enc -e SELKIES_VIDEO_BITRATE=8000 -e SELKIES_FRAMERATE=60 -e SELKIES_AUDIO_BITRATE=128000 -e SELKIES_BASIC_AUTH_PASSWORD=mypasswd -p 8080:8080 ghcr.io/selkies-project/nvidia-egl-desktop:latest
 ```
 
 **Alternatively, use Docker Compose by editing the [`docker-compose.yml`](docker-compose.yml) file:**
@@ -51,12 +51,12 @@ docker compose down
 
 ```bash
 # Customize paths
-export APPTAINER_SELKIES_OVERLAY=~/my_mounting_point/nvidia-egl-desktop.sif
-export APPTAINER_SELKIES_SCRATCH_HOME=~/nvidia-egl-desktop
-mkdir -pm755 "${APPTAINER_SELKIES_SCRATCH_HOME}"
+export SINGULARITY_SELKIES_OVERLAY=~/my_mounting_point/nvidia-egl-desktop.sif
+export SINGULARITY_SELKIES_SCRATCH_HOME=~/nvidia-egl-desktop
+mkdir -pm755 "${SINGULARITY_SELKIES_SCRATCH_HOME}"
 # Change size of overlay storage
-apptainer overlay create --sparse --size 1536 "${APPTAINER_SELKIES_OVERLAY}"
-apptainer instance run --overlay "${APPTAINER_SELKIES_OVERLAY}" --nv --no-mount cwd --home "${APPTAINER_SELKIES_SCRATCH_HOME}:/home/ubuntu" --env "TZ=UTC,DISPLAY_SIZEW=1920,DISPLAY_SIZEH=1080,DISPLAY_REFRESH=60,DISPLAY_DPI=96,DISPLAY_CDEPTH=24,PASSWD=mypasswd,SELKIES_ENCODER=nvh264enc,SELKIES_VIDEO_BITRATE=8000,SELKIES_FRAMERATE=60,SELKIES_AUDIO_BITRATE=128000,SELKIES_BASIC_AUTH_PASSWORD=mypasswd" docker://ghcr.io/selkies-project/nvidia-egl-desktop:latest egl
+singularity overlay create --sparse --size 1536 "${SINGULARITY_SELKIES_OVERLAY}"
+singularity instance run --overlay "${SINGULARITY_SELKIES_OVERLAY}" --nv --no-mount cwd --home "${SINGULARITY_SELKIES_SCRATCH_HOME}:/home/ubuntu" --env "TZ=UTC,DISPLAY_SIZEW=1920,DISPLAY_SIZEH=1080,DISPLAY_REFRESH=60,DISPLAY_DPI=96,DISPLAY_CDEPTH=24,PASSWD=mypasswd,SELKIES_ENCODER=nvh264enc,SELKIES_VIDEO_BITRATE=8000,SELKIES_FRAMERATE=60,SELKIES_AUDIO_BITRATE=128000,SELKIES_BASIC_AUTH_PASSWORD=mypasswd" docker://ghcr.io/selkies-project/nvidia-egl-desktop:latest egl
 ```
 
 Change `SELKIES_ENCODER` to `x264enc`, `vp8enc`, or `vp9enc` when using the Selkies-GStreamer interface if you are using software fallback without allocated GPUs or your GPU does not support `H.264 (AVCHD)` under the `NVENC - Encoding` section in NVIDIA's [Video Encode and Decode GPU Support Matrix](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new).
@@ -88,9 +88,9 @@ Add environment variables `-e SELKIES_TURN_PROTOCOL=udp -e SELKIES_TURN_PORT=347
 
 Then, open the ports with the `docker run` arguments `-p 8080:8080 -p 3478:3478 -p 3478:3478/udp -p 65534-65535:65534-65535 -p 65534-65535:65534-65535/udp` (or uncomment the relevant [`docker-compose.yml`](docker-compose.yml) sections) in addition to the web server port.
 
-All these ports must be exposed to the internet if you need access over the internet. If you need use TURN within a local network, add `-e SELKIES_TURN_HOST=[YOUR_INTERNAL_IP]` with `YOUR_INTERNAL_IP` to the internal hostname or IP of the local network.
-
 If UDP cannot be used, at the cost of higher latency and lower performance, omit the ports containing `/udp` and use the environment variable `-e SELKIES_TURN_PROTOCOL=tcp`.
+
+All these ports must be exposed to the internet if you need access over the internet. If you need use TURN within a local network, add `-e SELKIES_TURN_HOST=[YOUR_INTERNAL_IP]` with `YOUR_INTERNAL_IP` to the internal hostname or IP of the local network.
 
 </details>
 
@@ -159,9 +159,9 @@ There is an internal [TURN server](https://github.com/selkies-project/selkies-gs
 
 Uncomment the relevant environment variables `SELKIES_TURN_PROTOCOL=udp`, `SELKIES_TURN_PORT=3478`, `TURN_MIN_PORT=65534`, `TURN_MAX_PORT=65535` (change the ports accordingly) within `egl.yml` (within `name:` and `value:`), where the `SELKIES_TURN_PORT` should not be used by any other host process or container, and the `TURN_MIN_PORT`/`TURN_MAX_PORT` port range has to contain at least two ports also not used by any other host process or container. Then, open all of these ports in the Kubernetes configuration `ports:` section in addition to the web server port.
 
-All these ports must be exposed to the internet if you need access over the internet. If you need use TURN within a local network, add the environment variable `SELKIES_TURN_HOST=[YOUR_INTERNAL_IP]` (within `name:` and `value:`) with `YOUR_INTERNAL_IP` to the internal hostname or IP of the local network.
+If UDP cannot be used, at the cost of higher latency and lower performance, omit the UDP ports in the configuration and use the environment variable `SELKIES_TURN_PROTOCOL=tcp` (within `name:` and `value:`).
 
-If UDP cannot be used, at the cost of higher latency and lower performance, omit the ports containing `/udp` and use the environment variable `SELKIES_TURN_PROTOCOL=tcp` (within `name:` and `value:`).
+All these ports must be exposed to the internet if you need access over the internet. If you need use TURN within a local network, add the environment variable `SELKIES_TURN_HOST=[YOUR_INTERNAL_IP]` (within `name:` and `value:`) with `YOUR_INTERNAL_IP` to the internal hostname or IP of the local network.
 
 </details>
 
@@ -316,6 +316,10 @@ kubectl create secret generic turn-password --from-literal=turn-password=MY_SELK
 ### I have an issue related to the Selkies-GStreamer WebRTC HTML5 interface.
 
 **[Link](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/README.md)**
+
+### I want to customize this container.
+
+**[Link](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/development.md)**
 
 ### I want to use the keyboard layout of my own language.
 
