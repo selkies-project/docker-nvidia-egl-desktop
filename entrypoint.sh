@@ -94,9 +94,9 @@ export XDG_SESSION_ID="${DISPLAY#*:}"
 export QT_LOGGING_RULES='*.debug=false;qt.qpa.*=false'
 if [ -n "$(nvidia-smi --query-gpu=uuid --format=csv,noheader | head -n1)" ] || [ -n "$(ls -A /dev/dri 2>/dev/null)" ]; then
   export VGL_FPS="${DISPLAY_REFRESH}"
-  /usr/bin/vglrun -d "${VGL_DISPLAY:-egl}" +wm /usr/bin/dbus-launch /usr/bin/startplasma-x11 &
+  /usr/bin/vglrun -d "${VGL_DISPLAY:-egl}" +wm /usr/bin/startplasma-x11 &
 else
-  /usr/bin/dbus-launch /usr/bin/startplasma-x11 &
+  /usr/bin/startplasma-x11 &
 fi
 
 # Start Fcitx input method framework
