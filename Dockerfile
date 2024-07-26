@@ -389,9 +389,7 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         kmix \
         kmousetool \
         kmouth \
-        knewstuff-dialog \
         ksshaskpass \
-        ksystemstats \
         ktimer \
         kwayland-integration \
         kwin-addons \
