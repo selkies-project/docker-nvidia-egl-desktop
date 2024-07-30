@@ -317,7 +317,9 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
     mkdir -pm755 /etc/apt/trusted.gpg.d && curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x0AB215679C571D1C8325275B9BDB3D89CE49EC21" | gpg --dearmor -o /etc/apt/trusted.gpg.d/mozillateam-ubuntu-ppa.gpg && \
     mkdir -pm755 /etc/apt/sources.list.d && echo "deb https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu $(grep UBUNTU_CODENAME= /etc/os-release | cut -d= -f2 | tr -d '\"') main" > "/etc/apt/sources.list.d/mozillateam-ubuntu-ppa-$(grep UBUNTU_CODENAME= /etc/os-release | cut -d= -f2 | tr -d '\"').list" && \
     apt-get update && apt-get install --no-install-recommends -y \
-        kde-plasma-desktop \
+        kde-baseapps \
+        plasma-desktop \
+        plasma-workspace \
         adwaita-icon-theme-full \
         appmenu-gtk3-module \
         ark \
@@ -380,7 +382,6 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         kmouth \
         ksshaskpass \
         ktimer \
-        kwayland-integration \
         kwin-addons \
         kwin-x11 \
         libdbusmenu-glib4 \
@@ -400,7 +401,6 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         media-player-info \
         okular \
         okular-extra-backends \
-        partitionmanager \
         plasma-browser-integration \
         plasma-calendar-addons \
         plasma-dataengines-addons \
@@ -408,13 +408,12 @@ Pin-Priority: -1" > /etc/apt/preferences.d/firefox-nosnap && \
         plasma-integration \
         plasma-runners-addons \
         plasma-widgets-addons \
-        policykit-desktop-privileges \
-        polkit-kde-agent-1 \
         print-manager \
         qapt-deb-installer \
         qml-module-org-kde-runnermodel \
         qml-module-org-kde-qqc2desktopstyle \
         qml-module-qtgraphicaleffects \
+        qml-module-qt-labs-platform \
         qml-module-qtquick-xmllistmodel \
         qt5-gtk-platformtheme \
         qt5-image-formats-plugins \
