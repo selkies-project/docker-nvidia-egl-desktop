@@ -79,7 +79,7 @@ Choose whether to use host networking, an internal [TURN server](https://github.
 
 - **Internal TURN Server:**
 
-<details>
+<details markdown>
   <summary>Open Section</summary>
 
 There is an internal [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server) inside the container that may be used when an external [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server) or host networking is not available.
@@ -96,7 +96,7 @@ All these ports must be exposed to the internet if you need access over the inte
 
 - **Host Networking:**
 
-<details>
+<details markdown>
   <summary>Open Section</summary>
 
 The Selkies-GStreamer WebRTC HTML5 interface will likely just start working if you open UDP and TCP ports 49152–65535 in your host server network and add `--network host` to the above `docker run` command, or `network_mode: 'host'` in `docker-compose.yml`. Note that running multiple desktop containers in one host under this configuration may be problematic and is not recommended. When deploying multiple containers, you must also pass a new `DISPLAY` environment variable such as `-e DISPLAY=:22` into the container, that is not used with any other X11 server or container in the same host.
@@ -107,7 +107,7 @@ However, host networking may be restricted or not be desired because of security
 
 - **External TURN Server:**
 
-<details>
+<details markdown>
   <summary>Open Section</summary>
 
 If having no TURN server does not work, you need an external [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server). Read the [WebRTC and Firewall Issues](#webrtc-and-firewall-issues) section and add the environment variables `-e SELKIES_TURN_HOST=`, `-e SELKIES_TURN_PORT=`, and pick one of `-e SELKIES_TURN_SHARED_SECRET=` or both `-e SELKIES_TURN_USERNAME=` and `-e SELKIES_TURN_PASSWORD=` environment variables to the `docker run` command based on your authentication method.
@@ -152,7 +152,7 @@ Choose whether to use host networking, an internal [TURN server](https://github.
 
 - **Internal TURN Server:**
 
-<details>
+<details markdown>
   <summary>Open Section</summary>
 
 There is an internal [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server) inside the container that may be used when an external [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server) or host networking is not available.
@@ -167,7 +167,7 @@ All these ports must be exposed to the internet if you need access over the inte
 
 - **Host Networking:**
 
-<details>
+<details markdown>
   <summary>Open Section</summary>
 
 Otherwise, the Selkies-GStreamer WebRTC HTML5 interface will likely just start working if you open UDP and TCP ports 49152–65535 in your host server network and uncomment `hostNetwork: true` in `egl.yml`. Note that running multiple desktop containers in one host under this configuration may be problematic and is not recommended. When deploying multiple desktop containers with `hostNetwork: true`, you must also pass a new `DISPLAY` environment variable such as the value `:22` into the container, that is not used with any other X11 server or container in the same host.
@@ -178,7 +178,7 @@ However, host networking may be restricted or not be desired because of security
 
 - **External TURN Server:**
 
-<details>
+<details markdown>
   <summary>Open Section</summary>
 
 If having no TURN server does not work, you need an external [TURN server](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/firewall.md#turn-server). Read the [WebRTC and Firewall Issues](#webrtc-and-firewall-issues) section and fill in the environment variables `SELKIES_TURN_HOST` and `SELKIES_TURN_PORT`, then pick one of `SELKIES_TURN_SHARED_SECRET` or both `SELKIES_TURN_USERNAME` and `SELKIES_TURN_PASSWORD` environment variables, based on your authentication method.
@@ -223,7 +223,7 @@ Your TURN server will use only one out of three ways to authenticate the client,
 
 If there is a shared TURN server within an infrastructure, consider reading the [TURN REST API](https://github.com/selkies-project/selkies-gstreamer/blob/main/docs/component.md#turn-rest) documentation or provide the link to your infrastructure administrator to deploy a TURN REST API server.
 
-<details>
+<details markdown>
   <summary>Open Section</summary>
 
 Then, uncomment the lines in the `egl.yml` file related to TURN server usage, updating the `SELKIES_TURN_REST_URI` environment variable as needed:
@@ -241,7 +241,7 @@ Then, uncomment the lines in the `egl.yml` file related to TURN server usage, up
 
 #### Time-limited shared secret authentication
 
-<details>
+<details markdown>
   <summary>Open Section</summary>
 
 **1. Create a secret containing the TURN shared secret:**
@@ -276,7 +276,7 @@ kubectl create secret generic turn-shared-secret --from-literal=turn-shared-secr
 
 #### Legacy long-term authentication
 
-<details>
+<details markdown>
   <summary>Open Section</summary>
 
 **1. Create a secret containing the TURN password:**
@@ -323,7 +323,7 @@ kubectl create secret generic turn-password --from-literal=turn-password=MY_SELK
 
 ### I want to use the keyboard layout of my own language.
 
-<details>
+<details markdown>
   <summary>Open Answer</summary>
 
 Run `Input Method: Configure Input Method` from the start menu, uncheck `Only Show Current Language`, search and add from available input methods (Hangul, Mozc, Pinyin, and others) by moving to the right, then use `Ctrl + Space` to switch between the input methods. Raise an issue if you need more layouts.
@@ -332,7 +332,7 @@ Run `Input Method: Configure Input Method` from the start menu, uncheck `Only Sh
 
 ### The container does not work.
 
-<details>
+<details markdown>
   <summary>Open Answer</summary>
 
 Check that the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) is properly configured in the host. Next, check that your host NVIDIA GPU driver is not the `nvidia-headless` variant, which lacks the required display and graphics capabilities for this container.
@@ -361,7 +361,7 @@ If you checked everything here, scroll down.
 
 ### I want to use `systemd`, `polkit`, FUSE mounts, or sandboxed (containerized) application distribution systems like Flatpak, Snapcraft (snap), AppImage, Electron, chrome-sandbox, etc.
 
-<details>
+<details markdown>
   <summary>Open Answer</summary>
 
 **Use the option `--appimage-extract-and-run` or `--appimage-extract` with your AppImage to run them in a container. Alternatively, set `export APPIMAGE_EXTRACT_AND_RUN=1` to your current shell.**
@@ -372,7 +372,7 @@ Do not use `systemd`, `polkit`, FUSE mounts, or sandboxed application distributi
 
 ### OpenGL does not work for certain applications.
 
-<details>
+<details markdown>
   <summary>Open Answer</summary>
 
 This is likely an issue with [VirtualGL](https://github.com/VirtualGL/virtualgl), which is used to translate GLX commands to EGL commands and use OpenGL without Xorg. Some applications, including research workloads, show this problem. This **cannot** be solved by raising an issue here or contacting me.
@@ -383,7 +383,7 @@ First, check that the application works with [docker-nvidia-glx-desktop](https:/
 
 ### Vulkan does not work.
 
-<details>
+<details markdown>
   <summary>Open Answer</summary>
 
 Make sure that the `NVIDIA_DRIVER_CAPABILITIES` environment variable is set to `all`, or includes both `graphics` and `display`. The `display` capability is especially crucial to Vulkan, but the container does start without noticeable issues other than Vulkan without `display`, despite its name. AMD and Intel GPUs are not tested and therefore Vulkan is not guaranteed to work. People are welcome to share their experiences, however.
@@ -392,7 +392,7 @@ Make sure that the `NVIDIA_DRIVER_CAPABILITIES` environment variable is set to `
 
 ### I want to use a specific GPU for OpenGL rendering when I have multiple GPUs in one container.
 
-<details>
+<details markdown>
   <summary>Open Answer</summary>
 
 Use the `VGL_DISPLAY` environment variable, but only do so after you understand what it implicates with [VirtualGL](https://github.com/VirtualGL/virtualgl). Valid values are either `egl[n]`, or `/dev/dri/card[n]` only when `--device=/dev/dri` was used for the container (`[n]` is the order of the GPUs, where simply `egl` without the number is the same as `egl0`). Note that `docker --gpus 1` means any single GPU, not the GPU device ID of 1. Use `docker --gpus '"device=1,2"'` to provision GPUs with device IDs 1 and 2 to the container.
